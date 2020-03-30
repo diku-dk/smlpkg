@@ -1,0 +1,15 @@
+local
+   $(SML_LIB)/basis/basis.mlb
+   from-string.sig
+   from-string.sml
+   bytestring.sig
+   bytestring.sml
+   convert-word-mlkit.sml
+   susp.sig
+   susp.sml
+   stream.sig
+   stream.sml
+in
+   sha256.sml
+end
+   
