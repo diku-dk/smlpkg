@@ -1,0 +1,4 @@
+local $(SML_LIB)/basis/basis.mlb
+      semver.mlb
+in test.sml
+end

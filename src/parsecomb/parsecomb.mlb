@@ -1,0 +1,6 @@
+local $(SML_LIB)/basis/basis.mlb
+in REGION.sig
+   Region.sml
+   PARSE_COMB.sig
+   ParseComb.sml
+end
