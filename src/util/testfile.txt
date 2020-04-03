@@ -1,0 +1,8 @@
+Hi there,
+
+This is a small test file with
+a few lines of text for testing...
+
+Best,
+
+M.
