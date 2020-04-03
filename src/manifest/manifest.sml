@@ -65,7 +65,7 @@ val p_pkgpath : pkgpath p =
      (p_id >>- eat (L.Symb #"/")) >>> p_id) oo
         (fn ((a,b),c) => {host=a,owner=b,repo=c})
 
-val p_hash : string p = p_id
+val p_hash : string p = eat (L.Symb #"#") ->> p_id
 
 fun p_semver nil = NO (R.botloc, fn () => "expecting semantic version but found end-of-file")
   | p_semver ((L.Id id,r)::ts) =

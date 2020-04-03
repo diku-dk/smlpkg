@@ -1,4 +1,11 @@
-structure Solve :> SOLVE = struct
+functor Solve (PI :
+               sig
+                 type pkg_revinfo
+                 val lookupPackageRev  : Manifest.pkgpath -> SemVer.t -> pkg_revinfo
+                 val pkgRevGetManifest : pkg_revinfo -> Manifest.t
+                 val pkgRevCommit      : pkg_revinfo -> string
+               end) : SOLVE =
+struct
 
 structure M = FinMapEq
 type pkgpath = Manifest.pkgpath
@@ -20,7 +27,7 @@ fun solve (ps:pkgpath list) (d: pkg_rev_deps) : pkg_rev_deps =
       | p::ps =>
         case M.lookup d p of
             SOME (v,hopt) =>
-            let val m = PkgInfo.pkgRevGetManifest (PkgInfo.lookupPackageRev p v)
+            let val m = PI.pkgRevGetManifest (PI.lookupPackageRev p v)
                 val rs = List.filter (fn (p,v,hopt) =>
                                          case M.lookup d p of
                                              SOME (v',hopt') => SemVer.<(v',v)
@@ -38,16 +45,16 @@ fun prune (ps:pkgpath list) (d:pkg_rev_deps) (bl:buildlist) : buildlist =
       | p::ps =>
         case M.lookup d p of
             SOME (v,hopt) =>
-            let val ri = PkgInfo.lookupPackageRev p v
+            let val ri = PI.lookupPackageRev p v
                 val () = case hopt of
                              SOME h =>
-                             if h = PkgInfo.pkgRevCommit ri then ()
+                             if h = PI.pkgRevCommit ri then ()
                              else fail ("Package " ^ Manifest.pkgpathToString p ^
                                         " " ^ SemVer.toString v ^
-                                        " has commit hash " ^ PkgInfo.pkgRevCommit ri ^
+                                        " has commit hash " ^ PI.pkgRevCommit ri ^
                                         ", but expected " ^ h ^ " from package manifest.")
                            | NONE => ()
-                val m = PkgInfo.pkgRevGetManifest ri
+                val m = PI.pkgRevGetManifest ri
                 val ps' = List.filter (fn p => case M.lookup bl p of
                                                    SOME _ => false
                                                  | NONE => true)
@@ -67,5 +74,9 @@ fun solveDeps (d: pkg_rev_deps) : buildlist =
 fun pkgRevDeps (m:Manifest.t) : pkg_rev_deps =
     List.foldr (fn ((p,v,h),t) => M.add (p,(v,h)) t)
                (M.empty_eq()) (Manifest.requires m)
+
+fun buildListToString (bl: buildlist) : string =
+    M.toString (Manifest.pkgpathToString, SemVer.toString) bl
+
 
 end

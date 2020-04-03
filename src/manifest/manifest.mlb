@@ -1,7 +1,6 @@
 local
   $(SML_LIB)/basis/basis.mlb
   ../parsecomb/parsecomb.mlb
-  ../sha256/sha256.mlb
   lex.sig
   lex.sml
 in

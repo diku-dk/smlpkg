@@ -15,7 +15,7 @@ fun loc0 (f:filename) : loc = (1,0,f) (* line 1, char 0 *)
 datatype state = StartS
                | IdS of string * loc * loc
 
-fun isSymb c = CharVector.exists (fn c' => c'=c) "{}/"
+fun isSymb c = CharVector.exists (fn c' => c'=c) "{}/#"
 
 fun lexError (loc:loc) (s:string) : 'a =
     let val msg = "Lexical error at location " ^ R.ppLoc loc ^ ": " ^ s

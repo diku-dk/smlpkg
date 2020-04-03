@@ -1,23 +1,25 @@
 MLCOMP ?= mlkit
 
-.PHONY: all
-all: pkg.exe
+SMLFILES=$(shell find . -name '*.sml') $(shell find . -name '*.sig') $(shell find . -name '*.mlb')
 
-pkg.exe: pkg.mlb pkginfo.sig pkginfo.sml
+.PHONY: all
+all: smlpkg
+
+smlpkg: pkg.mlb $(SMLFILES)
 	$(MLCOMP) -output $@ $<
 
 .PHONY: test
 test:
 	$(MAKE) -C semver test
 	$(MAKE) -C manifest test
-	$(MAKE) -C sha256 test
+	$(MAKE) -C solve test
 	$(MAKE) -C util test
 
 .PHONY: clean
 clean:
-	rm -rf *~ MLB run pkg.exe
+	rm -rf *~ MLB run pkg.exe smlpkg
 	$(MAKE) -C semver clean
 	$(MAKE) -C manifest clean
+	$(MAKE) -C solve clean
 	$(MAKE) -C parsecomb clean
-	$(MAKE) -C sha256 clean
 	$(MAKE) -C util clean

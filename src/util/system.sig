@@ -23,6 +23,8 @@ signature SYSTEM = sig
   val doesDirExist             : dirpath -> bool
 
   val removePathForcibly       : path -> unit
+  val renameDirectory          : dirpath -> dirpath -> unit
+  val takeDirectory            : path -> dirpath
 
   val </>                      : dirpath * path -> path
 end

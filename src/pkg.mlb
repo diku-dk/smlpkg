@@ -4,6 +4,8 @@ local $(SML_LIB)/basis/basis.mlb
       util/util.mlb
       pkginfo.sig
       pkginfo.sml
-in solve.sig
-   solve.sml
+      solve/solve.sig
+      solve/solve.sml
+in
+      pkg.sml
 end

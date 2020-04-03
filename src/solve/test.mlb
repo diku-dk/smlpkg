@@ -1,0 +1,8 @@
+local $(SML_LIB)/basis/basis.mlb
+      ../semver/semver.mlb
+      ../manifest/manifest.mlb
+      ../util/util.mlb
+      solve.sig
+      solve.sml
+in test.sml
+end

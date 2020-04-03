@@ -1,8 +1,13 @@
 
 structure Pkg = struct
 
+structure Solve = Solve(PkgInfo)
+
 (* Some utilities *)
 fun println s = print (s ^ "\n")
+
+val verboseFlag = ref false
+fun log s = if !verboseFlag then println s else ()
 
 fun isPrefixList (nil,_) = true
   | isPrefixList (x::xs,y::ys) = x = y andalso isPrefixList (xs,ys)
@@ -13,9 +18,12 @@ fun isInPkgDir (from_dir:string) (f:string) : bool =
 
 fun is_in e l = List.exists (fn x => x = e) l
 
+structure M = FinMapEq
 type filepath = string
 type pkgpath = Manifest.pkgpath
+type required = Manifest.required
 type buildlist = Solve.buildlist
+type semver = SemVer.t
 
 infix </>
 val op </> = System.</>
@@ -55,8 +63,8 @@ fun installInDir (bl:buildlist) (dir:filepath) : unit =
                          package files. *)
                       val from_dir =
                           case Manifest.pkg_dir m of
-                              SOME d => PkgInfo.pkgRevZipballDir info d
-                            | NONE => raise Fail (smlpkg_filename() ^ " for " ^
+                              SOME d => PkgInfo.pkgRevZipballDir info </> d
+                            | NONE => raise Fail (smlpkg_filename() ^ " for "
                                                   ^ Manifest.pkgpathToString p ^ "-"
                                                   ^ SemVer.toString v
                                                   ^ " does not define a package path.")
@@ -129,27 +137,28 @@ fun installBuildList (p:pkgpath option) (bl:buildlist) : unit =
                        in if pkgdir_exists then
                             (* Ensure the parent directories exist so that we can move the
                                package directory directly. *)
-                            ( System.createDirectoryIfMissing true (takeDirectory (libDir </> pfp))
+                            ( System.createDirectoryIfMissing true (System.takeDirectory (libDir </> pfp))
                             ; System.renameDirectory (libOldDir </> pfp) (libDir </> pfp))
                           else ()
                        end
                      else ()
+                   | NONE => ()
 
-        val () = if libdir_exists then                    (* 6 *)
-                 then System.removePathForcibly libOldDir
+        val () = if libdir_exists then                              (* 6 *)
+                   System.removePathForcibly libOldDir
                  else ()
     in ()
     end
 
 fun getPkgManifest () : Manifest.t =
     let val smlpkg = smlpkg_filename ()
-        val () = if System.doesDirExist smlpkg then
-                   raise Fail (smlpkg ^
-                               " exists, but it is a directory!  What in Odin's beard...")
-    in if System.doesFileExist smlpkg then
-         Manifest.fromFile smlpkg
-       else ( log (smlpkg ^ " not found - pretending it's empty.")
-            ; Manifest.empty NONE)
+    in  if System.doesDirExist smlpkg then
+          raise Fail (smlpkg ^
+                      " exists, but it is a directory!  What in Odin's beard...")
+        else if System.doesFileExist smlpkg then
+          Manifest.fromFile smlpkg
+        else ( log (smlpkg ^ " not found - pretending it's empty.")
+             ; Manifest.empty NONE)
     end
 
 fun putPkgManifest (m:Manifest.t) : unit =
@@ -163,53 +172,48 @@ fun usageMsg s =
      ; OS.Process.exit(OS.Process.failure)
     end
 
-fun simpleUsage () =
-    usageMsg ("options... <" ^
-              String.concatWith "|" (map #1 commands)
-              ^ ">")
-
 fun doFmt args =
     case args of
         [] => let val smlpkg = smlpkg_filename()
                   val m = Manifest.fromFile smlpkg
               in System.writeFile smlpkg (Manifest.toString m)
               end
-      | _ => simpleUsage()
+      | _ => raise Fail "command 'fmt' expects zero arguments."
 
 fun doCheck args =
     case args of
         [] => let val m = getPkgManifest()
-                  val bl = Solve.solveDeps (Manifest.pkgRevDeps m)
-                  val () = print "Dependencies chosen:\n"
-                  val () = print (prettyBuildList bl)
+                  val bl = Solve.solveDeps (Solve.pkgRevDeps m)
+                  val () = println "Dependencies chosen:"
+                  val () = println (Solve.buildListToString bl)
               in case Manifest.package m of
                      NONE => ()
                    | SOME pkgpath =>
                      let val pdir = "lib" </> Manifest.pkgpathToString pkgpath
                          val pdir_exists = OS.FileSys.isDir pdir
                      in if pdir_exists then ()
-                        else raise Fail ("Problem: the directory " ^ pdir ^ " does not exist.")
+                        else raise Fail ("the directory " ^ pdir ^ " does not exist.")
                      end
               end
-      | _ => simpleUsage()
+      | _ => raise Fail "command 'check' expects zero arguments."
 
 fun doSync args =
     case args of
         [] => let val m = getPkgManifest()
-                  val bl = Solve.solveDeps (Manifest.pkgRevDeps m)
+                  val bl = Solve.solveDeps (Solve.pkgRevDeps m)
               in installBuildList (Manifest.package m) bl
               end
-      | _ => simpleUsage()
+      | _ => raise Fail "command 'sync' expects zero arguments."
 
 fun pkgpathParse (s:string) : pkgpath =
     case Manifest.pkgpathFromString s of
         SOME p => p
-      | NONE => raise Fail ("expecting package path - got '" ^ s ^ "'.")
+      | NONE => raise Fail ("invalid package path '" ^ s ^ "'.")
 
 fun semverParse (s:string) : semver =
     case SemVer.fromString s of
         SOME v => v
-      | NONE => raise Fail ("expecting semantic version - got '" ^ s ^ "'.")
+      | NONE => raise Fail ("invalid semantic version '" ^ s ^ "'.")
 
 fun doAdd' (p:pkgpath) (v:semver) : unit =
     let val m = getPkgManifest()
@@ -220,7 +224,8 @@ fun doAdd' (p:pkgpath) (v:semver) : unit =
            for PkgRevDeps is left-biased, so we are careful to use the
            new version for this package. *)
 
-        val () = Solve.solveDeps (M.add (p,(v,NONE)) (Manifest.pkgRevDeps m))
+        val () = ignore (Solve.solveDeps (M.add (p,(v,NONE))
+                                                (Solve.pkgRevDeps m)))
 
         (* We either replace any existing occurence of package 'p', or
            we add a new one. *)
@@ -257,7 +262,7 @@ fun doAdd args : unit =
     case args of
         [p, v] => doAdd' (pkgpathParse p) (semverParse v)
       | [p] => doAdd' (pkgpathParse p) (PkgInfo.lookupNewestRev (pkgpathParse p))
-      | _ => simpleUsage()
+      | _ => raise Fail "command 'add' expects one or two arguments."
 
 fun doRemove args : unit =
     case args of
@@ -271,9 +276,9 @@ fun doRemove args : unit =
                 ; println ("Removed " ^ ps ^ " " ^ SemVer.toString (#2 r) ^ ".")
                end
              | NONE =>
-               raise Fail ("No package " ^ ps ^ " found in " ^ smlpkg_filename() ^ ".")
+               raise Fail ("no package " ^ ps ^ " found in " ^ smlpkg_filename() ^ ".")
         end
-      | _ => simpleUsage()
+      | _ => raise Fail "command 'remove' expects one argument."
 
 fun doInit args =
     case args of
@@ -289,14 +294,14 @@ fun doInit args =
         in putPkgManifest m
          ; println ("Wrote " ^ smlpkg_filename() ^ ".")
         end
-      | _ => simpleUsage()
+      | _ => raise Fail "command 'init' expects one argument."
 
 fun doUpgrade args : unit =
     case args of
         [] =>
         let fun upgrade (req:required) : required =
-                let val v = PkgInfo.lookupNewestRev (requiredPkg req)
-                    val h = PkgInfo.pkgRevCommit (PkgInfo.lookupPackageRev (requiredPkg req) v)
+                let val v = PkgInfo.lookupNewestRev (#1 req)
+                    val h = PkgInfo.pkgRevCommit (PkgInfo.lookupPackageRev (#1 req) v)
                 in if v <> (#2 req) then
                      ( println ("Upgraded " ^ Manifest.pkgpathToString (#1 req) ^ " " ^
                                 SemVer.toString (#2 req) ^ " => " ^
@@ -313,24 +318,24 @@ fun doUpgrade args : unit =
          ; (if rs = rs0 then println ("Nothing to upgrade.")
             else println ("Remember to run '" ^ CommandLine.name() ^ " sync'."))
         end
-      | _ => simpleUsage()
+      | _ => raise Fail "command 'upgrade' expects zero arguments."
 
 
 fun doVersions args : unit =
     case args of
         [p] =>
-        let val p = Manifest.pkgpathParse p
+        let val p = pkgpathParse p
             val pinfo = PkgInfo.lookupPackage p
             val versions = PkgInfo.pkgVersions pinfo
         in List.app (println o SemVer.toString) (M.keys versions)
         end
-      | _ => simpleUsage()
+      | _ => raise Fail "command 'versions' expects one argument."
 
 fun eatFlags args =
     case args of
-        arg :: args => if arg = "-v" orelse arg = "--verbose"
-                       then (verboseFlag := true; eatFlags args)
-                       else args
+        arg :: args' => if arg = "-v" orelse arg = "--verbose"
+                        then (verboseFlag := true; eatFlags args')
+                        else args
       | nil => args
 
 fun main () =
@@ -357,20 +362,31 @@ fun main () =
             Option.map #2 (List.find (fn (k,v) => s=k) l)
 
         fun doUsage () =
-            let val k = List.foldl Int.max 0 (map (length o #1) commands) + 3
-                val msg = String.concat "\n"
-                                        (["<command> ...:", "", "Commands:"] @
-                                         map (fn (cmd,(_,desc)) =>
-                                                 "   " ^ cmd ^ repl (k-length cmd) " " ^ desc)
-                                             commands)
+            let val k = List.foldl Int.max 0 (map (size o #1) commands) + 3
+                val msg = String.concatWith "\n"
+                                            (["<command> ...:", "", "Commands:"] @
+                                             map (fn (cmd,(_,desc)) =>
+                                                     "   " ^
+                                                     StringCvt.padRight #" " k cmd ^
+                                                     desc)
+                                                 commands)
             in usageMsg msg
             end
+
+        fun simpleUsage () =
+            usageMsg ("options... <" ^
+                      String.concatWith "|" (map #1 commands)
+                      ^ ">")
     in
       case eatFlags (CommandLine.arguments()) of
-          cmd :: args => (case look cmd command of
-                              SOME (doCmd,doc) => doCmd args
-                            | NONE => usageMsg usage)
-        | _ => doUsage()
+          [] => doUsage()
+        | cmd :: args =>
+          case look cmd commands of
+              SOME (doCmd,doc) =>
+              (doCmd args
+               handle Fail s => (println ("Error: " ^ s);
+                                 simpleUsage()))
+            | NONE => doUsage()
     end
 
 val () = main()

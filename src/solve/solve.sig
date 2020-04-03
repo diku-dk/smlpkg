@@ -10,4 +10,5 @@ signature SOLVE = sig
   val pkgRevDeps : Manifest.t -> pkg_rev_deps
   val solveDeps  : pkg_rev_deps -> buildlist
 
+  val buildListToString : buildlist -> string
 end

@@ -128,4 +128,6 @@ fun renameDirectory (old:dirpath) (new:dirpath) : unit =
       OS.FileSys.rename{old=old,new=new}
     else raise Fail ("'" ^ old ^ "' is not a directory.")
 
+fun takeDirectory (p:path) : dirpath = OS.Path.dir p
+
 end
