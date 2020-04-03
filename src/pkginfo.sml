@@ -1,9 +1,12 @@
-structure PkgInfo :> PKG_INFO = struct
+structure PkgInfo :> PKG_INFO =
+struct
 
   structure M = FinMapEq
 
   fun println s = print (s ^ "\n")
-  fun log s = println s
+
+  val verboseFlag = ref false
+  fun log s = if !verboseFlag then println ("[" ^ s ^ "]") else ()
 
   type pkgpath = Manifest.pkgpath
   type semver = SemVer.t
@@ -22,10 +25,13 @@ structure PkgInfo :> PKG_INFO = struct
   fun pkgRevTime (r:pkg_revinfo) : Time.time = #pkgRevTime r
 
   type pkg_info = {pkgVersions: (semver,pkg_revinfo)M.t,
-                   pkgLookupCommit : string option -> pkg_revinfo}
+                   pkgLookupCommit: string option -> pkg_revinfo}
+
+  fun pkgVersions (pinfo:pkg_info) : (semver,pkg_revinfo) M.t =
+      #pkgVersions pinfo
 
   fun lookupPkgRev (v:semver) (pi:pkg_info) : pkg_revinfo option =
-      M.lookup (#pkgVersions pi) v
+      M.lookup (pkgVersions pi) v
 
   fun majorRevOfPkg (p: pkgpath) : pkgpath * int list =
       let fun mk r = {host= #host p, owner= #owner p, repo= r}
@@ -63,7 +69,7 @@ structure PkgInfo :> PKG_INFO = struct
      both. *)
 
   fun ghglRevGetManifest (url:string) (owner:string) (repo:string) (tag:string) : Manifest.t =
-      let val () = log ("Downloading package manifest from " ^ url)
+      let val () = log ("downloading package manifest from " ^ url)
           val path = owner ^ "/" ^ repo ^ "@" ^ tag ^ "/" ^ Manifest.smlpkg_filename()
           val s = httpRequest url
                   handle Fail e =>
@@ -99,7 +105,7 @@ structure PkgInfo :> PKG_INFO = struct
 
   fun ghglPkgInfo (repo_url:string) mk_archive_url mk_manifest_url
                   (owner:string) (repo:string) (versions:int list) : pkg_info =
-      let val () = log ("Retrieving list of tags from " ^ repo_url)
+      let val () = log ("retrieving list of tags from " ^ repo_url)
           val remote_lines = gitCmd ["ls-remote", repo_url]
           val remote_lines = String.tokens (fn c => c = #"\n") remote_lines
           fun isHeadRef (l:string) : string option =
@@ -176,10 +182,6 @@ structure PkgInfo :> PKG_INFO = struct
         | _ => raise Fail ("Unable to handle package paths of the form '"
                            ^ Manifest.pkgpathToString p ^ "'")
 
-  fun pkgVersions (pinfo: pkg_info) : (semver,pkg_revinfo) M.t =
-      #pkgVersions pinfo
-
-
   (* Cached access *)
 
   local
@@ -201,7 +203,7 @@ structure PkgInfo :> PKG_INFO = struct
                         NONE => raise Fail "impossible: failed to form valid commit version"
                       | SOME v => v
             val pinfo' = {pkgLookupCommit = #pkgLookupCommit pinfo,
-                          pkgVersions = M.add (v,rev_info) (#pkgVersions pinfo)}
+                          pkgVersions = M.add (v,rev_info) (pkgVersions pinfo)}
             val () = registry := M.add (p,pinfo') (!registry)
         in (v, rev_info)
         end
@@ -215,7 +217,7 @@ structure PkgInfo :> PKG_INFO = struct
             in case lookupPkgRev v pinfo of
                    NONE =>
                    let val versions =
-                           case M.keys (#pkgVersions pinfo) of
+                           case M.keys (pkgVersions pinfo) of
                                [] => ("Package " ^ Manifest.pkgpathToString p ^
                                       " has no versions.  Invalid package path?")
                              | ks => ("Known versions: " ^
@@ -236,14 +238,15 @@ structure PkgInfo :> PKG_INFO = struct
     (* Find the newest version of a package. *)
     fun lookupNewestRev (p:pkgpath) : semver =
         let val pinfo = lookupPackage p
-        in case M.keys (#pkgVersions pinfo) of
+        in case M.keys (pkgVersions pinfo) of
                [] =>
-               ( log ("Package " ^ Manifest.pkgpathToString p ^
+               ( log ("package " ^ Manifest.pkgpathToString p ^
                       " has no released versions.  Using HEAD.")
                ; #1 (lookupPackageCommit p NONE))
              | v::vs =>
                let fun max (v1,v2) = if SemVer.< (v1,v2) then v2 else v1
-               in List.foldl max v vs  (* memo: what about versions of
+               in log "finding newest version of packages"
+                ; List.foldl max v vs  (* memo: what about versions of
                                         * equal priority - should we use
                                         * foldr? *)
                end

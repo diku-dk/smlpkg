@@ -19,4 +19,4 @@ install:
 
 script:
  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make -C src clean test ; fi
- - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make -C src clean test ; fi
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make -C src clean test remotetest; fi

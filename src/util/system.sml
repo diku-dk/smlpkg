@@ -59,6 +59,12 @@ fun hasTrailingPathSeparator (p:string) : bool =
 infix </>
 fun x </> y = if x = "" then y else x ^ "/" ^ y
 
+fun doesFileExist (p:path) : bool =
+    OS.FileSys.access(p,[])
+
+fun doesDirExist (p:dirpath) : bool =
+    OS.FileSys.access(p,[]) andalso OS.FileSys.isDir p
+
 fun createDirectoryIfMissing (also_parents:bool) (p:string) : unit =
     let fun check d =
             case d of
@@ -71,9 +77,12 @@ fun createDirectoryIfMissing (also_parents:bool) (p:string) : unit =
         fun loop pre nil = ()
           | loop pre (x::xs) =
             let val d = pre </> x
-            in if OS.FileSys.isDir d then loop d xs
+            in if doesDirExist d then loop d xs
                else if null xs orelse also_parents then
-                 ( OS.FileSys.mkDir d
+                 ( (if doesFileExist d then
+                      raise Fail ("cannot create directory " ^ d ^
+                                  " as a file exists with that name.")
+                    else OS.FileSys.mkDir d)
                  ; loop d xs)
                else raise Fail ("parent directory " ^ d ^ " of " ^ p ^ " does not exist.")
             end
@@ -101,12 +110,6 @@ fun makeRelative (f:dirpath) (p:path) : string =
         in loop(splitPath f, splitPath p)
         end
      | _ => raise Fail "makeRelative assumes relative directories as arguments"
-
-fun doesFileExist (p:path) : bool =
-    OS.FileSys.access(p,[])
-
-fun doesDirExist (p:dirpath) : bool =
-    OS.FileSys.isDir p
 
 fun removePathForcibly (p:path) : unit =
     if doesDirExist p then

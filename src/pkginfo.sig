@@ -20,4 +20,5 @@ signature PKG_INFO = sig
   val lookupPackageRev    : pkgpath -> semver -> pkg_revinfo
   val lookupNewestRev     : pkgpath -> semver
 
+  val verboseFlag         : bool ref
 end

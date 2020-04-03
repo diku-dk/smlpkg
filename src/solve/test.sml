@@ -14,31 +14,31 @@ fun no_version p v =
 (* m_repo10_0_1_X : leaf package with no requirements *)
 val m_repo10_0_1_0 =
     Manifest.fromString "m_repo10_0_1_0.pkg"
-                        "package github.com/owner1/repo10 requires {}"
+                        "package github.com/owner1/repo10 require {}"
 
 val m_repo10_0_1_1 =
     Manifest.fromString "m_repo10_0_1_1.pkg"
-                        "package github.com/owner1/repo10 requires {}"
+                        "package github.com/owner1/repo10 require {}"
 
 (* m_repo20_0_2_0 : package with repo10_0_1_0 requirement *)
 val m_repo20_0_2_0 =
     Manifest.fromString "m_repo20_0_2_0.pkg"
-                        "package github.com/owner2/repo20 requires { github.com/owner1/repo10 0.1.0 }"
+                        "package github.com/owner2/repo20 require { github.com/owner1/repo10 0.1.0 }"
 
 (* m_repo20_0_2_1 : package with repo10_0_1_1 requirement *)
 val m_repo20_0_2_1 =
     Manifest.fromString "m_repo20_0_2_1.pkg"
-                        "package github.com/owner2/repo20 requires { github.com/owner1/repo10 0.1.1 }"
+                        "package github.com/owner2/repo20 require { github.com/owner1/repo10 0.1.1 }"
 
 (* m_repo30_0_3_0 : package with repo20_0_2_0 requirement and repo10_0_1_0 requirement *)
 val m_repo30_0_3_0 =
     Manifest.fromString "m_repo30_0_3_0.pkg"
-                        "package github.com/owner3/repo30 requires { github.com/owner1/repo10 0.1.0 github.com/owner2/repo20 0.2.0 }"
+                        "package github.com/owner3/repo30 require { github.com/owner1/repo10 0.1.0 github.com/owner2/repo20 0.2.0 }"
 
 (* m_repo30_0_3_1 : package with repo20_0_2_1 requirement and repo10_0_1_0 requirement *)
 val m_repo30_0_3_1 =
     Manifest.fromString "m_repo30_0_3_1.pkg"
-                        "package github.com/owner3/repo30 requires { github.com/owner1/repo10 0.1.0 github.com/owner2/repo20 0.2.1 }"
+                        "package github.com/owner3/repo30 require { github.com/owner1/repo10 0.1.0 github.com/owner2/repo20 0.2.1 }"
 
 structure PkgInfoMock = struct
 type pkg_revinfo = Manifest.t * string

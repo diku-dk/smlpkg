@@ -1,13 +1,13 @@
 
-structure Pkg = struct
+structure Pkg : sig val main : string -> unit end =
+struct
 
 structure Solve = Solve(PkgInfo)
 
 (* Some utilities *)
 fun println s = print (s ^ "\n")
 
-val verboseFlag = ref false
-fun log s = if !verboseFlag then println s else ()
+fun log s = if !PkgInfo.verboseFlag then println ("[" ^ s ^ "]") else ()
 
 fun isPrefixList (nil,_) = true
   | isPrefixList (x::xs,y::ys) = x = y andalso isPrefixList (xs,ys)
@@ -167,7 +167,7 @@ fun putPkgManifest (m:Manifest.t) : unit =
 (* The Command-line interface *)
 
 fun usageMsg s =
-    let val prog = CommandLine.name()
+    let val prog = OS.Path.file (CommandLine.name())
     in print ("Usage: " ^ prog ^ " [--version] [--help] " ^ s ^ "\n")
      ; OS.Process.exit(OS.Process.failure)
     end
@@ -255,7 +255,8 @@ fun doAdd' (p:pkgpath) (v:semver) : unit =
               | NONE => println ("Added new required package " ^ Manifest.pkgpathToString p ^
                                  " " ^ SemVer.toString v ^ ".")
     in putPkgManifest m
-     ; println ("Remember to run '" ^ CommandLine.name() ^ " sync'.")
+     ; println ("Remember to run '" ^ OS.Path.file(CommandLine.name()) ^
+                " sync'.")
     end
 
 fun doAdd args : unit =
@@ -284,10 +285,12 @@ fun doInit args =
     case args of
         [p as ps] =>
         let val smlpkg = smlpkg_filename()
-            val () = if System.doesFileExist smlpkg orelse System.doesDirExist smlpkg
+            val () = log "checking for package file"
+            val () = if System.doesFileExist smlpkg
                      then raise Fail (smlpkg ^ " already exists.")
                      else ()
             val p = pkgpathParse p
+            val () = log "creating directory 'lib'"
             val () = System.createDirectoryIfMissing true ("lib" </> ps)
             val () = println("Created directory 'lib/" ^ ps ^ "'.")
             val m = Manifest.empty (SOME p)
@@ -316,7 +319,8 @@ fun doUpgrade args : unit =
             val m = Manifest.replace_requires m rs
         in putPkgManifest m
          ; (if rs = rs0 then println ("Nothing to upgrade.")
-            else println ("Remember to run '" ^ CommandLine.name() ^ " sync'."))
+            else println ("Remember to run '" ^
+                          OS.Path.file(CommandLine.name()) ^ " sync'."))
         end
       | _ => raise Fail "command 'upgrade' expects zero arguments."
 
@@ -334,12 +338,13 @@ fun doVersions args : unit =
 fun eatFlags args =
     case args of
         arg :: args' => if arg = "-v" orelse arg = "--verbose"
-                        then (verboseFlag := true; eatFlags args')
+                        then (PkgInfo.verboseFlag := true; eatFlags args')
                         else args
       | nil => args
 
-fun main () =
-    let val smlpkg = smlpkg_filename ()
+fun main (pkg_filename:string) : unit =
+    let val () = Manifest.set_smlpkg_filename pkg_filename
+        val smlpkg = smlpkg_filename ()
         val commands = [ ("add",
                           (doAdd, "Add another required package to " ^ smlpkg ^ "."))
                        , ("check",
@@ -389,5 +394,4 @@ fun main () =
             | NONE => doUsage()
     end
 
-val () = main()
 end

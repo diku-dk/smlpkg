@@ -5,6 +5,16 @@ structure L = Lex
 structure P = ParseComb(type token = L.token
                         val pr_token = L.pr_token)
 
+(* The standard name of package files ; we allow for this standard to change so
+   that we kan use the package manager as a replacement of futhark pkg - mainly
+   for testing... *)
+local
+  val filename = ref "sml.pkg"
+in
+  fun smlpkg_filename () = !filename
+  fun set_smlpkg_filename s = filename := s
+end
+
 type pkgpath = {host:string,owner:string,repo:string}
 
 fun pkgpathToString (p:pkgpath) : string =
@@ -28,17 +38,18 @@ type t = {package: pkgpath option,
 fun package (m: t) : pkgpath option = #package m
 fun requires (m: t) : required list = #requires m
 
-fun pr_require (p,v,hopt) =
-    "  " ^ pkgpathToString p ^  " " ^ SemVer.toString v ^
-    (case hopt of SOME h => " #" ^ h | NONE => "")
 
 fun toString (m: t) : string =
-    (case #package m of
-         SOME p => "package " ^ pkgpathToString p ^ "\n\n"
-       | NONE => "") ^
-    ("require {\n") ^
-    (String.concatWith "\n" (map pr_require (#requires m))) ^
-    ("}")
+    let fun pr_require (p,v,hopt) =
+            "  " ^ pkgpathToString p ^ " " ^ SemVer.toString v ^
+            (case hopt of SOME h => " #" ^ h | NONE => "") ^ "\n"
+    in (case #package m of
+            SOME p => "package " ^ pkgpathToString p ^ "\n"
+          | NONE => "") ^
+       ("require {\n") ^
+       (String.concat (map pr_require (#requires m))) ^
+       ("}")
+    end
 
 fun empty (p: pkgpath option) : t =
     {package=p, requires=nil}
@@ -83,12 +94,12 @@ val rec p_reqs : required list p =
          || ((p_req oo (fn a => [a]) ?? p_reqs) (op @))
     ) ts
 
-val p_requires : required list p =
-    eat (L.Id "requires") ->> eat (L.Symb #"{") ->> p_reqs
+val p_require : required list p =
+    eat (L.Id "require") ->> eat (L.Symb #"{") ->> p_reqs
 
 val p : t p =
-    ((((eat (L.Id "package") ->> p_pkgpath) oo SOME) >>> p_requires)
-         || (p_requires oo (fn r => (NONE,r))))
+    ((((eat (L.Id "package") ->> p_pkgpath) oo SOME) >>> p_require)
+         || (p_require oo (fn r => (NONE,r))))
         oo (fn (p,rs) => {package=p,requires=rs})
 
 fun parse (ts:(token*reg) list) : t =
@@ -115,7 +126,7 @@ fun fromFile (filename:string) : t =
 
 fun add_required (r:required) (t:t) : t =
     {package= #package t,
-     requires= r :: (#requires t)}
+     requires= #requires t @ [r]}
 
 fun del_required (pkgpath:pkgpath) (t:t) : t =
     {package= #package t,
@@ -132,8 +143,6 @@ fun pkg_dir (t:t) : string option =
     case #package t of
         SOME p => SOME ("lib/" ^ pkgpathToString p ^ "/")
       | NONE => NONE
-
-fun smlpkg_filename () = "sml.pkg"
 
 (* Versions of the form (0,0,0)-timestamp+hash are treated
    specially, as a reference to the commit identified uniquely with

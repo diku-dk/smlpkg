@@ -3,9 +3,12 @@ MLCOMP ?= mlkit
 SMLFILES=$(shell find . -name '*.sml') $(shell find . -name '*.sig') $(shell find . -name '*.mlb')
 
 .PHONY: all
-all: smlpkg
+all: smlpkg futpkg
 
-smlpkg: pkg.mlb $(SMLFILES)
+smlpkg: smlpkg.mlb $(SMLFILES)
+	$(MLCOMP) -output $@ $<
+
+futpkg: futpkg.mlb $(SMLFILES)
 	$(MLCOMP) -output $@ $<
 
 .PHONY: test
@@ -15,6 +18,10 @@ test:
 	$(MAKE) -C solve test
 	$(MAKE) -C util test
 
+.PHONY: remotetest
+remotetest:
+	$(MAKE) -C test test
+
 .PHONY: clean
 clean:
 	rm -rf *~ MLB run pkg.exe smlpkg
@@ -23,3 +30,4 @@ clean:
 	$(MAKE) -C solve clean
 	$(MAKE) -C parsecomb clean
 	$(MAKE) -C util clean
+	$(MAKE) -C test clean
