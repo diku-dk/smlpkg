@@ -6,8 +6,6 @@ os:
  - linux
  - osx
 
-sudo: true
-
 before_install:
  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then rm -f /usr/local/include/c++ ; fi
@@ -16,7 +14,9 @@ before_install:
  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y mlton make ; fi
 
 install:
- - make -C src clean all
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make -C src clean all ; fi
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make -C src clean all ; fi
 
 script:
- - make -C src test
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make -C src clean test ; fi
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make -C src clean test ; fi
