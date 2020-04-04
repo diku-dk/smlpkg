@@ -1,4 +1,5 @@
 package github.com/melsman/test
+
 require {
   github.com/melsman/segmented 0.1.0 #2f06da7b048cc45cad89a0829012a63ab639d361
 }

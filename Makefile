@@ -6,6 +6,7 @@ all:
 .PHONY: test
 test:
 	$(MAKE) -C src test
+	$(MAKE) -C src/test test
 	$(MAKE) -C pkgtests test
 
 .PHONY: clean

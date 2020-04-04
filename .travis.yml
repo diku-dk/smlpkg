@@ -14,9 +14,9 @@ before_install:
  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y mlton make ; fi
 
 install:
- - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make -C src clean all ; fi
- - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make -C src clean all ; fi
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make clean all ; fi
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make clean all ; fi
 
 script:
- - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make -C src clean test ; fi
- - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make -C src clean test remotetest; fi
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make test ; fi
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make test ; fi

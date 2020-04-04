@@ -37,15 +37,18 @@ futhark.pkg.test3.out: ../futpkg
 # -------------------------------
 
 %.res: futhark.pkg.%.out
-	@(diff -aq futhark.pkg.$*.out futhark.pkg.$*.ok > /dev/null 2>&1; \
+	@(diff -aq $< futhark.pkg.$*.ok > /dev/null 2>&1; \
          if [ $$? -eq 0 ]; then \
              echo "OK:  $*" > $@ \
          ; else \
-             if [ -e $<.ok ]; then \
+             if [ -e futhark.pkg.$*.ok ]; then \
+                echo "ERR: $* - file $< differs from futhark.pkg.$*.ok"; \
                 echo "ERR: $* - file $< differs from futhark.pkg.$*.ok" > $@ \
              ; else \
+                echo "ERR: $* - file futhark.pkg.$*.ok does not exist"; \
                 echo "ERR: $* - file futhark.pkg.$*.ok does not exist" > $@ \
              ; fi \
+             ; exit 1 \
          ;fi)
 
 ../futpkg:
