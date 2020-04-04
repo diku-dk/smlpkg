@@ -1,0 +1,4 @@
+local $(SML_LIB)/basis/basis.mlb
+      util.mlb
+in test_zip.sml
+end

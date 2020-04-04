@@ -5,6 +5,12 @@ fun test s b =
     if b then print ("OK : " ^ s ^ "\n")
     else print ("ERR: " ^ s ^ "\n")
 
+fun testf s f =
+    (if f() then print ("OK : " ^ s ^ "\n")
+     else print ("ERR: " ^ s ^ "\n"))
+    handle Fail e => print ("EXN: " ^ s ^ " raised Fail \"" ^ e ^ "\"\n")
+         | Overflow => print ("EXN: " ^ s ^ " raised Overflow\n")
+
 fun test_major_minor_patch s (z,a,b) =
     let val () = test ("major0" ^ s) (Option.map major (fromString z) = SOME 0)
         val () = test ("major1" ^ s) (Option.map major (fromString a) = SOME 3)
@@ -129,3 +135,8 @@ val () = testerr "prerelerr2" "0.1.2-*s"
 
 val () = testerr "prerelerr1" "0.1.2-ssd+*l"
 val () = testerr "prerelerr2" "0.1.2-ssd+s*"
+
+val () = testf "ovf" (fn () =>
+                         let val t = fromString "0.0.0-20180801102532+b70028521e4dbcc286834b32ce82c1d2721a6209"
+                         in Option.map major t = SOME 0
+                         end)

@@ -44,11 +44,11 @@ fun toString (m: t) : string =
             "  " ^ pkgpathToString p ^ " " ^ SemVer.toString v ^
             (case hopt of SOME h => " #" ^ h | NONE => "") ^ "\n"
     in (case #package m of
-            SOME p => "package " ^ pkgpathToString p ^ "\n"
+            SOME p => "package " ^ pkgpathToString p ^ "\n\n"
           | NONE => "") ^
        ("require {\n") ^
        (String.concat (map pr_require (#requires m))) ^
-       ("}")
+       ("}\n")
     end
 
 fun empty (p: pkgpath option) : t =
@@ -141,7 +141,7 @@ fun replace_requires (t:t) (rs:required list) : t =
 
 fun pkg_dir (t:t) : string option =
     case #package t of
-        SOME p => SOME ("lib/" ^ pkgpathToString p ^ "/")
+        SOME p => SOME ("lib/" ^ pkgpathToString p)
       | NONE => NONE
 
 (* Versions of the form (0,0,0)-timestamp+hash are treated

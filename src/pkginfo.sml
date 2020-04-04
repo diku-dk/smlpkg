@@ -92,10 +92,13 @@ struct
 
   fun ghglLookupCommit (archive_url:string) (manifest_url:string)
                        (owner:string) (repo:string) (d:string)
-                       (tag:string) (hash:string) : pkg_revinfo =
+                       (tag:string) (hash:string) (version_prefix:string)
+      : pkg_revinfo =
       let val mc = cache ghglRevGetManifest manifest_url owner repo tag
-          val dir = repo ^ "-" ^ d
+          val dir = repo ^ "-" ^ version_prefix ^ d
           val time = Time.now()
+          val () = log ("zip url: " ^ archive_url)
+          val () = log ("zip dir: " ^ dir)
       in {pkgRevZipballUrl=archive_url,
           pkgRevZipballDir=dir,
           pkgRevCommit=hash,
@@ -104,7 +107,8 @@ struct
       end
 
   fun ghglPkgInfo (repo_url:string) mk_archive_url mk_manifest_url
-                  (owner:string) (repo:string) (versions:int list) : pkg_info =
+                  (owner:string) (repo:string) (versions:int list)
+                  (version_prefix:string) : pkg_info =
       let val () = log ("retrieving list of tags from " ^ repo_url)
           val remote_lines = gitCmd ["ls-remote", repo_url]
           val remote_lines = String.tokens (fn c => c = #"\n") remote_lines
@@ -123,7 +127,7 @@ struct
                               let val m = SemVer.major v
                               in if List.exists (fn i => i=m) versions then
                                    let val pinfo = ghglLookupCommit (mk_archive_url t) (mk_manifest_url t)
-                                                                    owner repo (SemVer.toString v) t hash
+                                                                    owner repo (SemVer.toString v) t hash version_prefix
                                    in SOME (v,pinfo)
                                    end
                                  else NONE
@@ -138,7 +142,7 @@ struct
                  val rev_info = M.fromList_eq (List.mapPartial revInfo remote_lines)
                  fun lookupCommit (r:string option) =
                      ghglLookupCommit (mk_archive_url (def r)) (mk_manifest_url (def r))
-                                      owner repo (def r) (def r) (def r)
+                                      owner repo (def r) (def r) (def r) version_prefix
              in {pkgVersions=rev_info,
                  pkgLookupCommit=lookupCommit}
              end
@@ -151,7 +155,7 @@ struct
           fun mk_manifest_url r = "https://raw.githubusercontent.com/" ^
                                   owner ^ "/" ^ repo ^ "/" ^
                                   r ^ "/" ^ Manifest.smlpkg_filename()
-      in ghglPkgInfo repo_url mk_archive_url mk_manifest_url owner repo versions
+      in ghglPkgInfo repo_url mk_archive_url mk_manifest_url owner repo versions ""
       end
 
   fun glPkgInfo (owner:string) (repo:string) (versions:int list) : pkg_info =
@@ -161,7 +165,7 @@ struct
                                  "/" ^ repo ^ "-" ^ r ^ ".zip"
           fun mk_manifest_url r = base_url ^ "/raw/" ^
                                   r ^ "/" ^ Manifest.smlpkg_filename()
-      in ghglPkgInfo repo_url mk_archive_url mk_manifest_url owner repo versions
+      in ghglPkgInfo repo_url mk_archive_url mk_manifest_url owner repo versions "v"
       end
 
   (* Retrieve information about a package based on its package path.
@@ -179,8 +183,12 @@ struct
           let val (p',vs) = majorRevOfPkg p
           in ghPkgInfo (#owner p) (#repo p') vs
           end
-        | _ => raise Fail ("Unable to handle package paths of the form '"
-                           ^ Manifest.pkgpathToString p ^ "'")
+        | "gitlab.com" =>
+          let val (p',vs) = majorRevOfPkg p
+          in glPkgInfo (#owner p) (#repo p') vs
+          end
+        | _ => raise Fail ("only github.com or gitlab.com\
+                           \ are supported as hosts.")
 
   (* Cached access *)
 

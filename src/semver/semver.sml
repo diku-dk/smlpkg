@@ -2,7 +2,7 @@
 
 structure SemVer :> SEMVER = struct
 
-datatype id = NUMID of int | ALPHAID of string
+datatype id = NUMID of IntInf.int | ALPHAID of string
 
 type t = {major  : int,
           minor  : int,
@@ -10,7 +10,7 @@ type t = {major  : int,
           prerel : id list,
           build  : id list}
 
-fun idToString (NUMID i) = Int.toString i
+fun idToString (NUMID i) = IntInf.toString i
   | idToString (ALPHAID s) = s
 
 fun idsToString ids =
@@ -35,8 +35,8 @@ fun fromString (s: string) : t option =
             then ALPHAID s
             else raise Fail ("expecting alpha-id - got " ^ s)
         fun parseId s : id =
-            case Int.fromString s of
-                SOME n => if n > 0 andalso Int.toString n = s then NUMID n
+            case IntInf.fromString s of
+                SOME n => if n > 0 andalso IntInf.toString n = s then NUMID n
                           else parseAlphaId s
               | NONE => parseAlphaId s
         fun parseIds (s:string) : id list =

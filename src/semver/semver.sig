@@ -2,7 +2,7 @@
 
 signature SEMVER = sig
 
-  datatype id = NUMID of int | ALPHAID of string
+  datatype id = NUMID of IntInf.int | ALPHAID of string
   val idToString : id -> string
   val idsToString : id list -> string
 

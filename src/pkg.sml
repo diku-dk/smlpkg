@@ -33,55 +33,36 @@ val smlpkg_filename = Manifest.smlpkg_filename
 (* Installing packages *)
 
 fun installInDir (bl:buildlist) (dir:filepath) : unit =
-  let fun putEntry from_dir pdir (entry:Zip.entry) =
-          (* The archive may contain all kinds of other stuff that we don't want. *)
-          if not (isInPkgDir from_dir (Zip.eRelativePath entry))
-             orelse System.hasTrailingPathSeparator (Zip.eRelativePath entry) then ()
-          else
-            (* Since we are writing to paths indicated in a zipfile we
-               downloaded from the wild Internet, we are going to be a
-               little bit paranoid.  Specifically, we want to avoid
-               writing outside of the 'lib/' directory.  We do this by
-               bailing out if the path contains any '..' components.
-               We have to use System.FilePath.Posix, because the zip
-               library claims to encode filepaths with '/' directory
-               seperators no matter the host OS. *)
-            if is_in ".." (System.splitPath (Zip.eRelativePath entry)) then
-              raise Fail ("Zip archive for " ^ pdir ^ " contains suspicious path: " ^
-                          Zip.eRelativePath entry)
-            else
-              let val f = pdir </> System.makeRelative from_dir (Zip.eRelativePath entry)
-              in System.createDirectoryIfMissing true (OS.Path.dir f)
-               ; System.writeFileBin f (Zip.fromEntry entry)
-              end
-
-  in List.app (fn (p,v) =>
-                  let val info = PkgInfo.lookupPackageRev p v
-                      val a = Zip.download (PkgInfo.pkgRevZipballUrl info)
-                      val m = PkgInfo.pkgRevGetManifest info
-                      (* Compute the directory in the zipball that should contain the
-                         package files. *)
-                      val from_dir =
-                          case Manifest.pkg_dir m of
-                              SOME d => PkgInfo.pkgRevZipballDir info </> d
-                            | NONE => raise Fail (smlpkg_filename() ^ " for "
-                                                  ^ Manifest.pkgpathToString p ^ "-"
-                                                  ^ SemVer.toString v
-                                                  ^ " does not define a package path.")
-                      (* The directory in the local file system that will contain the
-                         package files. *)
-                      val pdir = dir </> Manifest.pkgpathToString p
-                      (* Remove any existing directory for this package.  This is a bit
-                         inefficient, as the likelihood that the old ``lib`` directory
-                         already contains the correct version is rather high.  We should
-                         have a way to recognise this situation, and not download the
-                         zipball in that case. *)
-                  in System.removePathForcibly pdir
-                   ; System.createDirectoryIfMissing true pdir
-                   ; List.app (putEntry from_dir pdir) (Zip.zEntries a)
-                  end
-              ) (M.toList bl)
-  end
+    let fun unpack (p,v) =
+            let val info = PkgInfo.lookupPackageRev p v
+                val zipurl = PkgInfo.pkgRevZipballUrl info
+                val () = log ("downloading " ^ zipurl)
+                val a = Zip.download zipurl
+                val m = PkgInfo.pkgRevGetManifest info
+                (* Compute the directory in the zipball that should contain the
+                   package files. *)
+                val from_dir =
+                    case Manifest.pkg_dir m of
+                        SOME d => PkgInfo.pkgRevZipballDir info </> d
+                      | NONE => raise Fail (smlpkg_filename() ^ " for "
+                                            ^ Manifest.pkgpathToString p ^ "-"
+                                            ^ SemVer.toString v
+                                            ^ " does not define a package path.")
+                (* The directory in the local file system that will contain the
+                   package files  . *)
+                val pdir = dir </> Manifest.pkgpathToString p
+            (* Remove any existing directory for this package.  This is a bit
+               inefficient, as the likelihood that the old ``lib`` directory
+               already contains the correct version is rather high.  We should
+               have a way to recognise this situation, and not download the
+               zipball in that case. *)
+            in System.removePathForcibly pdir
+             ; Zip.extractSubDir {log=log} a {path=from_dir,target=pdir}
+            end
+        val list = M.toList bl
+    in List.app unpack list
+     ; log (Int.toString (length list) ^ " packages extracted")
+    end
 
 val (libDir:filepath, libNewDir:filepath, libOldDir:filepath) =
     ("lib", "lib~new", "lib~old")
