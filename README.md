@@ -5,9 +5,22 @@ libraries and programs. The package manager assumes nothing and knows
 nothing about the Standard ML compilers used and is thus quite
 generic.
 
+The package manager is centered around the notion of [semantic
+versioning](https://semver.org/) and currently supports packages
+hosted on [GitHub](https://github.com/) and
+[GitLab](https://about.gitlab.com/).
+
+The package manager takes care of downloading and upgrading dependent
+packages and works well with the use of MLB files supported by
+Standard ML compilers such as [MLton](http://mlton.org/),
+[MLKit](http://elsman.com/mlkit/), and
+[SMLtoJs](http://www.smlserver.org/smltojs/).
+
 # Usage
 
-See also Troels Henriksen's [blog post on the design of the Futhark package manager](https://futhark-lang.org/blog/2018-08-03-the-present-futhark-package-manager.html).
+See also Troels Henriksen's [blog post on the design of the Futhark
+package
+manager](https://futhark-lang.org/blog/2018-08-03-the-present-futhark-package-manager.html).
 
 # Compilation
 

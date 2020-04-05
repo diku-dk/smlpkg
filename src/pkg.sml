@@ -149,7 +149,7 @@ fun putPkgManifest (m:Manifest.t) : unit =
 
 fun usageMsg s =
     let val prog = OS.Path.file (CommandLine.name())
-    in print ("Usage: " ^ prog ^ " [--version] [--help] " ^ s ^ "\n")
+    in print ("Usage: " ^ prog ^ " [--version] [--verbose] [--help] " ^ s ^ "\n")
      ; OS.Process.exit(OS.Process.failure)
     end
 
@@ -316,10 +316,17 @@ fun doVersions args : unit =
         end
       | _ => raise Fail "command 'versions' expects one argument."
 
+fun print_prog_version () =
+    let val prog = OS.Path.file (CommandLine.name())
+    in println (prog ^ " " ^ Version.version)
+    end
+
 fun eatFlags args =
     case args of
         arg :: args' => if arg = "-v" orelse arg = "--verbose"
                         then (PkgInfo.verboseFlag := true; eatFlags args')
+                        else if arg = "-V" orelse arg = "--version"
+                        then (print_prog_version(); OS.Process.exit OS.Process.success)
                         else args
       | nil => args
 

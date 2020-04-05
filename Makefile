@@ -1,7 +1,14 @@
+prefix ?= .
+INSTALLDIR ?= $(prefix)/bin
+INSTALL ?= install
 
 .PHONY: all
-all:
-	$(MAKE) -C src all
+all: src/smlpkg
+
+.PHONY:
+install: src/smlpkg
+	mkdir -p $(INSTALLDIR)
+	$(INSTALL) $< $(INSTALLDIR)/
 
 .PHONY: test
 test:
@@ -12,4 +19,7 @@ test:
 .PHONY: clean
 clean:
 	$(MAKE) -C src clean
-	rm -f *~ .*~
+	rm -rf *~ .*~ bin
+
+src/smlpkg:
+	$(MAKE) -C src all

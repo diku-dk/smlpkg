@@ -6,6 +6,7 @@ local $(SML_LIB)/basis/basis.mlb
       pkginfo.sml
       solve/solve.sig
       solve/solve.sml
+      version.gen.sml
 in
       pkg.sml
 end

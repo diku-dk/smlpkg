@@ -2,10 +2,12 @@ MLCOMP ?= mlkit
 
 SMLFILES=$(shell find . -name '*.sml') $(shell find . -name '*.sig') $(shell find . -name '*.mlb')
 
+GITVERSION=$(shell git describe --abbrev --dirty --always --tags)
+
 .PHONY: all
 all: smlpkg futpkg
 
-smlpkg: smlpkg.mlb $(SMLFILES)
+smlpkg: smlpkg.mlb $(SMLFILES) version.gen.sml
 	$(MLCOMP) -output $@ $<
 
 futpkg: futpkg.mlb $(SMLFILES)
@@ -22,9 +24,14 @@ test:
 remotetest:
 	$(MAKE) -C test test
 
+version.gen.sml:
+	echo 'structure Version = struct' > $@
+	echo "  val version = \"$(GITVERSION)\"" >> $@
+	echo "end" >> $@
+
 .PHONY: clean
 clean:
-	rm -rf *~ MLB run pkg.exe smlpkg
+	rm -rf *~ MLB run pkg.exe smlpkg version.gen.sml
 	$(MAKE) -C semver clean
 	$(MAKE) -C manifest clean
 	$(MAKE) -C solve clean
