@@ -1,4 +1,4 @@
-# smlpkg [![Build Status](https://travis-ci.org/melsman/smlpkg.svg?branch=master)](https://travis-ci.org/melsman/smlpkg)
+# smlpkg [![Build Status](https://travis-ci.org/diku-dk/smlpkg.svg?branch=master)](https://travis-ci.org/diku-dk/smlpkg)
 
 This program constitutes a generic package manager for Standard ML
 libraries and programs. The package manager assumes nothing and knows
