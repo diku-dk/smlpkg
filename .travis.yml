@@ -14,9 +14,21 @@ before_install:
  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y mlton make ; fi
 
 install:
- - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make clean all ; fi
- - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make clean all ; fi
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make clean all bin_dist ; fi
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make clean all bin_dist ; fi
 
 script:
  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make test ; fi
  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then MLCOMP=mlton make test ; fi
+
+deploy:
+  provider: releases
+  api_key:
+    secure: e33a62d591a6e3582935f37d502e83a091a1fbae
+  file_glob: true
+  file: smlpkg-bin-dist-*.tgz
+  skip_cleanup: true
+  on:
+    repo: diku-dk/smlpkg
+    tags: true
+    branch: master
