@@ -41,7 +41,7 @@ futhark.pkg.test3.out: ../futpkg
          if [ $$? -eq 0 ]; then \
              echo "OK:  $*" > $@ \
          ; else \
-             if [ -e futhark.pkg.$*.ok ]; then \
+             if [ -e $<.ok ]; then \
                 echo "ERR: $* - file $< differs from futhark.pkg.$*.ok"; \
                 echo "ERR: $* - file $< differs from futhark.pkg.$*.ok" > $@ \
              ; else \
