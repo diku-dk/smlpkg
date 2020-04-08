@@ -18,8 +18,48 @@ Standard ML compilers such as [MLton](http://mlton.org/),
 
 # Usage
 
-See also Troels Henriksen's [blog post on the design of the Futhark
-package
+## Adding a package
+
+```
+$ smlpkg add github.com/diku-dk/sml-random
+```
+
+This modifies only `sml.pkg`.
+
+## Downloading required packages
+
+```
+$ smlpkg sync
+```
+
+This populates the `lib` directory based on the packages listed in `sml.pkg`.
+
+## Creating a new package
+
+```
+$ smlpkg init github.com/foo/bar
+```
+
+Put all code in the directory `lib/github.com/foo/bar/`.
+
+## Releasing a package
+
+```
+$ git tag vX.Y.Z
+$ git push --tags
+```
+
+Remember to follow [semantic versioning](https://semver.org).
+
+## Probably incomplete list of available packages
+
+* [github.com/diku-dk/sml-random](https://github.com/diku-dk/sml-random)
+* [github.com/diku-dk/sml-hashtable](https://github.com/diku-dk/sml-hashtable)
+* [github.com/diku-dk/sml-setmap](https://github.com/diku-dk/sml-setmap)
+
+## Design details
+
+See this [blog post on the design of the Futhark package
 manager](https://futhark-lang.org/blog/2018-08-03-the-present-futhark-package-manager.html).
 
 # Compilation
