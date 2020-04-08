@@ -53,11 +53,18 @@ Remember to follow [semantic versioning](https://semver.org).
 
 ## Probably incomplete list of available packages
 
-* [github.com/diku-dk/sml-hashtable](https://github.com/diku-dk/sml-hashtable)
-* [github.com/diku-dk/sml-regexp](https://github.com/diku-dk/sml-regexp)
-* [github.com/diku-dk/sml-random](https://github.com/diku-dk/sml-random)
-* [github.com/diku-dk/sml-setmap](https://github.com/diku-dk/sml-setmap)
-* [github.com/diku-dk/sml-sort](https://github.com/diku-dk/sml-sort)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-hashtable.svg?branch=master)](https://travis-ci.org/diku-dk/sml-hashtable)
+  [github.com/diku-dk/sml-hashtable](https://github.com/diku-dk/sml-hashtable)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-md5.svg?branch=master)](https://travis-ci.org/diku-dk/sml-md5)
+  [github.com/diku-dk/sml-md5](https://github.com/diku-dk/sml-md5)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-regexp.svg?branch=master)](https://travis-ci.org/diku-dk/sml-regexp)
+  [github.com/diku-dk/sml-regexp](https://github.com/diku-dk/sml-regexp)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-random.svg?branch=master)](https://travis-ci.org/diku-dk/sml-random)
+  [github.com/diku-dk/sml-random](https://github.com/diku-dk/sml-random)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-setmap.svg?branch=master)](https://travis-ci.org/diku-dk/sml-setmap)
+  [github.com/diku-dk/sml-setmap](https://github.com/diku-dk/sml-setmap)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-sort.svg?branch=master)](https://travis-ci.org/diku-dk/sml-sort)
+  [github.com/diku-dk/sml-sort](https://github.com/diku-dk/sml-sort)
 
 ## Design details
 
