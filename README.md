@@ -53,9 +53,11 @@ Remember to follow [semantic versioning](https://semver.org).
 
 ## Probably incomplete list of available packages
 
-* [github.com/diku-dk/sml-random](https://github.com/diku-dk/sml-random)
 * [github.com/diku-dk/sml-hashtable](https://github.com/diku-dk/sml-hashtable)
+* [github.com/diku-dk/sml-regexp](https://github.com/diku-dk/sml-regexp)
+* [github.com/diku-dk/sml-random](https://github.com/diku-dk/sml-random)
 * [github.com/diku-dk/sml-setmap](https://github.com/diku-dk/sml-setmap)
+* [github.com/diku-dk/sml-sort](https://github.com/diku-dk/sml-sort)
 
 ## Design details
 
