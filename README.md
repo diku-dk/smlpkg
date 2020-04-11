@@ -57,6 +57,8 @@ Remember to follow [semantic versioning](https://semver.org).
   [github.com/diku-dk/sml-hashtable](https://github.com/diku-dk/sml-hashtable)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-md5.svg?branch=master)](https://travis-ci.org/diku-dk/sml-md5)
   [github.com/diku-dk/sml-md5](https://github.com/diku-dk/sml-md5)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-pickle.svg?branch=master)](https://travis-ci.org/diku-dk/sml-pickle)
+  [github.com/diku-dk/sml-pickle](https://github.com/diku-dk/sml-pickle)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-regexp.svg?branch=master)](https://travis-ci.org/diku-dk/sml-regexp)
   [github.com/diku-dk/sml-regexp](https://github.com/diku-dk/sml-regexp)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-random.svg?branch=master)](https://travis-ci.org/diku-dk/sml-random)
@@ -65,6 +67,9 @@ Remember to follow [semantic versioning](https://semver.org).
   [github.com/diku-dk/sml-setmap](https://github.com/diku-dk/sml-setmap)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-sort.svg?branch=master)](https://travis-ci.org/diku-dk/sml-sort)
   [github.com/diku-dk/sml-sort](https://github.com/diku-dk/sml-sort)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-uref.svg?branch=master)](https://travis-ci.org/diku-dk/sml-uref)
+  [github.com/diku-dk/sml-uref](https://github.com/diku-dk/sml-uref)
+
 
 ## Design details
 
