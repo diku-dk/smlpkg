@@ -55,6 +55,8 @@ Remember to follow [semantic versioning](https://semver.org).
 
 * [![Build Status](https://travis-ci.org/diku-dk/sml-hashtable.svg?branch=master)](https://travis-ci.org/diku-dk/sml-hashtable)
   [github.com/diku-dk/sml-hashtable](https://github.com/diku-dk/sml-hashtable)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-json.svg?branch=master)](https://travis-ci.org/diku-dk/sml-json)
+  [github.com/diku-dk/sml-json](https://github.com/diku-dk/sml-json)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-md5.svg?branch=master)](https://travis-ci.org/diku-dk/sml-md5)
   [github.com/diku-dk/sml-md5](https://github.com/diku-dk/sml-md5)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-pickle.svg?branch=master)](https://travis-ci.org/diku-dk/sml-pickle)
