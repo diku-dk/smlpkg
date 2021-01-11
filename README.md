@@ -53,6 +53,8 @@ Remember to follow [semantic versioning](https://semver.org).
 
 ## Probably incomplete list of available packages
 
+* [![Build Status](https://travis-ci.org/diku-dk/sml-aplparse.svg?branch=master)](https://travis-ci.org/diku-dk/sml-aplparse)
+  [github.com/diku-dk/sml-aplparse](https://github.com/diku-dk/sml-aplparse)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-hashtable.svg?branch=master)](https://travis-ci.org/diku-dk/sml-hashtable)
   [github.com/diku-dk/sml-hashtable](https://github.com/diku-dk/sml-hashtable)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-json.svg?branch=master)](https://travis-ci.org/diku-dk/sml-json)
@@ -69,6 +71,8 @@ Remember to follow [semantic versioning](https://semver.org).
   [github.com/diku-dk/sml-setmap](https://github.com/diku-dk/sml-setmap)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-sort.svg?branch=master)](https://travis-ci.org/diku-dk/sml-sort)
   [github.com/diku-dk/sml-sort](https://github.com/diku-dk/sml-sort)
+* [![Build Status](https://travis-ci.org/diku-dk/sml-unicode.svg?branch=master)](https://travis-ci.org/diku-dk/sml-unicode)
+  [github.com/diku-dk/sml-unicode](https://github.com/diku-dk/sml-unicode)
 * [![Build Status](https://travis-ci.org/diku-dk/sml-uref.svg?branch=master)](https://travis-ci.org/diku-dk/sml-uref)
   [github.com/diku-dk/sml-uref](https://github.com/diku-dk/sml-uref)
 
