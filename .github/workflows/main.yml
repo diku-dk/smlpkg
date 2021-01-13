@@ -51,7 +51,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew install make
-	  brew install mlton
+          brew install mlton
 
       - name: Build
         run: |
