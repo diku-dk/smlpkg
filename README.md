@@ -1,12 +1,11 @@
-# smlpkg [![Build Status](https://travis-ci.org/diku-dk/smlpkg.svg?branch=master)](https://travis-ci.org/diku-dk/smlpkg)
+# smlpkg [![CI](https://github.com/diku-dk/smlpkg/workflows/CI/badge.svg)](https://github.com/diku-dk/smlpkg/actions)
 
 This program constitutes a generic package manager for Standard ML
 libraries and programs. The package manager assumes nothing and knows
 nothing about the Standard ML compilers used and is thus quite
 generic.
 
-The package manager is centered around the notion of [semantic
-versioning](https://semver.org/) and currently supports packages
+The package manager is centered around the notion of [semantic versioning](https://semver.org/) and currently supports packages
 hosted on [GitHub](https://github.com/) and
 [GitLab](https://about.gitlab.com/).
 
