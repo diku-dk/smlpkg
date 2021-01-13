@@ -1,3 +1,5 @@
+PKGVERSION=$(shell cat ../version.txt)
+
 MLCOMP ?= mlkit
 
 SMLFILES=$(shell find . -name '*.sml') $(shell find . -name '*.sig') $(shell find . -name '*.mlb')
@@ -24,9 +26,10 @@ test:
 remotetest:
 	$(MAKE) -C test test
 
-version.gen.sml:
+version.gen.sml: Makefile ../version.txt
 	echo 'structure Version = struct' > $@
-	echo "  val version = \"$(GITVERSION)\"" >> $@
+	echo "  val version = \"$(PKGVERSION)\"" >> $@
+	echo "  val gitversion = \"$(GITVERSION)\"" >> $@
 	echo "end" >> $@
 
 .PHONY: clean

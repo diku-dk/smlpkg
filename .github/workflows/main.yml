@@ -1,0 +1,62 @@
+# This is the smlpkg main workflow for building and testing smlpkg
+# on various architectures.  The workflow contains two jobs called
+# "build-test-ubuntu" and "build-test-macos". It is triggered on
+# push or pull request events but only for the master branch.
+
+name: CI
+
+on:
+
+  push:
+    branches: [ master ]
+
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+
+  build-test-linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get install -y mlton make
+
+      - name: Build
+        run: |
+          MLCOMP=mlton make clean all bin_dist
+
+      - name: Run tests
+        run: |
+          MLCOMP=mlton make test
+
+
+  build-test-macos:
+
+    runs-on: macos-latest
+
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          brew install make
+	  brew install mlton
+
+      - name: Build
+        run: |
+          MLCOMP=mlton make clean all bin_dist
+
+      - name: Run tests
+        run: |
+          MLCOMP=mlton make test

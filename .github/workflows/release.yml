@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build-test-release-linux:
+    name: Build, test, and upload release binaries (linux)
+    if: github.event.base_ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get install -y mlton make
+
+      - name: Build
+        run: |
+          MLCOMP=mlton make clean all bin_dist
+
+      - name: Run tests
+        run: |
+          MLCOMP=mlton make test
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: smlpkg-bin-dist-linux.tgz
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  build-test-release-macos:
+    name: Build, test, and upload release binaries (macos)
+    if: github.event.base_ref == 'refs/heads/master'
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          brew install make
+	  brew install mlton
+
+      - name: Build
+        run: |
+          MLCOMP=mlton make clean all bin_dist
+
+      - name: Run tests
+        run: |
+          MLCOMP=mlton make test
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: smlpkg-bin-dist-darwin.tgz
+          tag: ${{ github.ref }}
+          overwrite: true

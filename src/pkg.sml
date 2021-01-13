@@ -318,7 +318,7 @@ fun doVersions args : unit =
 
 fun print_prog_version () =
     let val prog = OS.Path.file (CommandLine.name())
-    in println (prog ^ " " ^ Version.version)
+    in println (prog ^ " " ^ Version.version ^ " (" ^ Version.gitversion ^ ")")
     end
 
 fun eatFlags args =
