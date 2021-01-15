@@ -38,4 +38,9 @@ bin_dist: src/smlpkg
 	$(INSTALL) LICENSE $(BIN_DIST_DIR)/
 	echo 'Binary package for smlpkg.' > $(BIN_DIST_DIR)/README
 	echo 'The sources are available at http://github.com/diku-dk/smlpkg' >> $(BIN_DIST_DIR)/README
+	echo 'PREFIX?=/usr/local' > $(BIN_DIST_DIR)/Makefile
+	echo 'INSTALL?=install' >> $(BIN_DIST_DIR)/Makefile
+	echo '.PHONY: install' >> $(BIN_DIST_DIR)/Makefile
+	echo 'install:' >> $(BIN_DIST_DIR)/Makefile
+	echo "\t"'$$(INSTALL) bin/smlpkg $$(PREFIX)/bin/' >> $(BIN_DIST_DIR)/Makefile
 	tar czvf $(BIN_DIST_DIR).tgz $(BIN_DIST_DIR)
