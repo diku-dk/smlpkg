@@ -54,6 +54,8 @@ Remember to follow [semantic versioning](https://semver.org).
 
 * [![CI](https://github.com/diku-dk/sml-aplparse/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-aplparse/actions)
   [github.com/diku-dk/sml-aplparse](https://github.com/diku-dk/sml-aplparse)
+* [![CI](https://github.com/diku-dk/sml-base64/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-base64/actions)
+  [github.com/diku-dk/sml-base64](https://github.com/diku-dk/sml-base64)
 * [![CI](https://github.com/diku-dk/sml-hashtable/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-hashtable/actions)
   [github.com/diku-dk/sml-hashtable](https://github.com/diku-dk/sml-hashtable)
 * [![CI](https://github.com/diku-dk/sml-json/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-json/actions)
@@ -70,6 +72,8 @@ Remember to follow [semantic versioning](https://semver.org).
   [github.com/diku-dk/sml-setmap](https://github.com/diku-dk/sml-setmap)
 * [![CI](https://github.com/diku-dk/sml-sort/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-sort/actions)
   [github.com/diku-dk/sml-sort](https://github.com/diku-dk/sml-sort)
+* [![CI](https://github.com/diku-dk/sml-sha256/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-sha256/actions)
+  [github.com/diku-dk/sml-sha256](https://github.com/diku-dk/sml-sha256)
 * [![CI](https://github.com/diku-dk/sml-unicode/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-unicode/actions)
   [github.com/diku-dk/sml-unicode](https://github.com/diku-dk/sml-unicode)
 * [![CI](https://github.com/diku-dk/sml-uref/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-uref/actions)
