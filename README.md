@@ -23,7 +23,7 @@ Standard ML compilers such as [MLton](http://mlton.org/),
 $ smlpkg add github.com/diku-dk/sml-random
 ```
 
-This modifies only `sml.pkg`.
+This command modifies only `sml.pkg` and creates it if it does not already exist.
 
 ## Downloading required packages
 
@@ -31,7 +31,7 @@ This modifies only `sml.pkg`.
 $ smlpkg sync
 ```
 
-This populates the `lib` directory based on the packages listed in `sml.pkg`.
+This command populates the `lib` directory based on the packages listed in `sml.pkg`.
 
 ## Creating a new package
 
@@ -39,7 +39,10 @@ This populates the `lib` directory based on the packages listed in `sml.pkg`.
 $ smlpkg init github.com/foo/bar
 ```
 
-Put all code in the directory `lib/github.com/foo/bar/`.
+This command creates a file `sml.pkg` and initiates it with the given
+package name (`foo` should be a github user name or an organisation
+name and `bar` should be a repository name). You can now add code in the
+directory `lib/github.com/foo/bar/`.
 
 ## Releasing a package
 
@@ -48,7 +51,9 @@ $ git tag vX.Y.Z
 $ git push --tags
 ```
 
-Remember to follow [semantic versioning](https://semver.org).
+Remember to follow [semantic versioning](https://semver.org). Once a
+package has been released, other packages can safely add the package
+to their own source code tree using `smlpkg add` (see above).
 
 ## Probably incomplete list of available packages
 
@@ -62,6 +67,8 @@ Remember to follow [semantic versioning](https://semver.org).
   [github.com/diku-dk/sml-json](https://github.com/diku-dk/sml-json)
 * [![CI](https://github.com/diku-dk/sml-md5/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-md5/actions)
   [github.com/diku-dk/sml-md5](https://github.com/diku-dk/sml-md5)
+* [![CI](https://github.com/diku-dk/sml-parse/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-parse/actions)
+  [github.com/diku-dk/sml-parse](https://github.com/diku-dk/sml-parse)
 * [![CI](https://github.com/diku-dk/sml-pickle/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-pickle/actions)
   [github.com/diku-dk/sml-pickle](https://github.com/diku-dk/sml-pickle)
 * [![CI](https://github.com/diku-dk/sml-regexp/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-regexp/actions)
