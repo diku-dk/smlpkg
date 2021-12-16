@@ -57,6 +57,8 @@ to their own source code tree using `smlpkg add` (see above).
 
 ## Probably incomplete list of available packages
 
+* [![CI](https://github.com/diku-dk/futhark-data-sml/workflows/CI/badge.svg)](https://github.com/diku-dk/futhark-data-sml/actions) [github.com/diku-dk/futhark-data-sml](https://github.com/diku-dk/futhark-data-sml)
+* [![CI](https://github.com/diku-dk/futhark-server-sml/workflows/CI/badge.svg)](https://github.com/diku-dk/futhark-server-sml/actions) [github.com/diku-dk/futhark-server-sml](https://github.com/diku-dk/futhark-server-sml)
 * [![CI](https://github.com/diku-dk/sml-aplparse/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-aplparse/actions)
   [github.com/diku-dk/sml-aplparse](https://github.com/diku-dk/sml-aplparse)
 * [![CI](https://github.com/diku-dk/sml-base64/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-base64/actions)
