@@ -81,7 +81,6 @@ to their own source code tree using `smlpkg add` (see above).
   [github.com/diku-dk/sml-random](https://github.com/diku-dk/sml-random)
 * [![CI](https://github.com/diku-dk/sml-server/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-server/actions)
   [github.com/diku-dk/sml-server](https://github.com/diku-dk/sml-server)
-  ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/diku-dk/sml-server)
 * [![CI](https://github.com/diku-dk/sml-setmap/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-setmap/actions)
   [github.com/diku-dk/sml-setmap](https://github.com/diku-dk/sml-setmap)
 * [![CI](https://github.com/diku-dk/sml-sort/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-sort/actions)
