@@ -93,6 +93,9 @@ to their own source code tree using `smlpkg add` (see above).
   [github.com/diku-dk/sml-unicode](https://github.com/diku-dk/sml-unicode)
 * [![CI](https://github.com/diku-dk/sml-uref/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-uref/actions)
   [github.com/diku-dk/sml-uref](https://github.com/diku-dk/sml-uref)
+* [github.com/shwestrick/sml-audio](https://github.com/shwestrick/sml-audio)
+* [github.com/shwestrick/sml-uri](https://github.com/shwestrick/sml-uri)
+* [github.com/shwestrick/sml-parseq](https://github.com/shwestrick/sml-parseq)
 
 
 ## Design details
