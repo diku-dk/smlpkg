@@ -9,7 +9,7 @@ jobs:
   build-test-release-linux:
     name: Build, test, and upload release binaries (linux)
     if: github.event.base_ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2
