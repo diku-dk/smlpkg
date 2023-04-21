@@ -20,7 +20,7 @@ jobs:
 
   build-test-linux:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
 
@@ -29,15 +29,19 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get -qq update
-          sudo apt-get install -y mlton make
+          sudo apt-get install -y make
+
+      - uses: diku-dk/install-mlkit@v1
+        with:
+          version: 'latest'
 
       - name: Build
         run: |
-          MLCOMP=mlton make clean all bin_dist
+          MLCOMP=mlkit make clean all bin_dist
 
       - name: Run tests
         run: |
-          MLCOMP=mlton make test
+          MLCOMP=mlkit make test
 
 
   build-test-macos:
