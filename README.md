@@ -71,6 +71,8 @@ to their own source code tree using `smlpkg add` (see above).
   [github.com/diku-dk/sml-json](https://github.com/diku-dk/sml-json)
 * [![CI](https://github.com/diku-dk/sml-md5/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-md5/actions)
   [github.com/diku-dk/sml-md5](https://github.com/diku-dk/sml-md5)
+* [![CI](https://github.com/diku-dk/sml-getopt/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-getopt/actions)
+  [github.com/diku-dk/sml-getopt](https://github.com/diku-dk/sml-getopt)
 * [![CI](https://github.com/diku-dk/sml-parse/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-parse/actions)
   [github.com/diku-dk/sml-parse](https://github.com/diku-dk/sml-parse)
 * [![CI](https://github.com/diku-dk/sml-pickle/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-pickle/actions)
