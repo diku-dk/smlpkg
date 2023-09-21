@@ -63,6 +63,8 @@ to their own source code tree using `smlpkg add` (see above).
   [github.com/diku-dk/sml-aplparse](https://github.com/diku-dk/sml-aplparse)
 * [![CI](https://github.com/diku-dk/sml-base64/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-base64/actions)
   [github.com/diku-dk/sml-base64](https://github.com/diku-dk/sml-base64)
+* [![CI](https://github.com/diku-dk/sml-cstring/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-cstring/actions)
+  [github.com/diku-dk/sml-cstring](https://github.com/diku-dk/sml-cstring)
 * [![CI](https://github.com/diku-dk/sml-hashtable/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-hashtable/actions)
   [github.com/diku-dk/sml-hashtable](https://github.com/diku-dk/sml-hashtable)
 * [![CI](https://github.com/diku-dk/sml-http/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-http/actions)
