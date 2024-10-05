@@ -14,7 +14,7 @@ fun fromFile (s:string) : t =
     {zipfile=s,deleted=ref false}
 
 fun download (url:string) : t =
-    let val localzip = OS.FileSys.tmpName() ^ ".zip"
+    let val localzip = OS.FileSys.tmpName()
         val (status,out,err) = System.command ("curl -L -o " ^ localzip ^ " " ^ url)
     in if OS.Process.isSuccess status then
          {zipfile=localzip,deleted=ref false}
@@ -37,7 +37,7 @@ fun extractSubDir {log: string -> unit} ({zipfile,deleted}:t) {path:string,targe
           val () = System.createDirectoryIfMissing true target
           fun cmds zipfile path target : {zipcmd:string,mvcmd:string,tmpdir:string} =
               let val tmpdir = target ^ "_tmp~"
-              in {zipcmd = "unzip " ^ zipfile ^ " '" ^ path ^ "/*' -d " ^ tmpdir,
+              in {zipcmd = "unzip " ^ zipfile ^ " '" ^ path ^ "/**' -d " ^ tmpdir,
                   mvcmd = "mv " ^ tmpdir ^ "/" ^ path ^ "/* " ^ target ^ "/",
                   tmpdir = tmpdir}
               end
@@ -49,16 +49,21 @@ fun extractSubDir {log: string -> unit} ({zipfile,deleted}:t) {path:string,targe
 
           val () = log ("cmd: " ^ zipcmd)
           val (status,out,err) = System.command zipcmd
+
+          val () = log ("removing " ^ zipfile)
+          val () = System.removePathForcibly zipfile
+
           val () = if OS.Process.isSuccess status then ()
                    else raise Fail ("failed to extract " ^ zipfile ^ ": " ^ err)
 
           val () = log ("cmd: " ^ mvcmd)
           val (status,out,err) = System.command mvcmd
-          val () = if OS.Process.isSuccess status then ()
-                   else raise Fail ("failed to move tmpdir into target: " ^ err)
 
           val () = log ("removing " ^ tmpdir)
           val () = System.removePathForcibly tmpdir
+
+          val () = if OS.Process.isSuccess status then ()
+                   else raise Fail ("failed to move tmpdir into target: " ^ err)
       in ()
       end
 
