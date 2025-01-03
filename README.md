@@ -83,6 +83,8 @@ to their own source code tree using `smlpkg add` (see above).
   [github.com/diku-dk/sml-parse](https://github.com/diku-dk/sml-parse)
 * [![CI](https://github.com/diku-dk/sml-pickle/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-pickle/actions)
   [github.com/diku-dk/sml-pickle](https://github.com/diku-dk/sml-pickle)
+* [![CI](https://github.com/diku-dk/sml-pretty/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-pretty/actions)
+  [github.com/diku-dk/sml-pretty](https://github.com/diku-dk/sml-pretty)
 * [![CI](https://github.com/diku-dk/sml-regexp/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-regexp/actions)
   [github.com/diku-dk/sml-regexp](https://github.com/diku-dk/sml-regexp)
 * [![CI](https://github.com/diku-dk/sml-random/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-random/actions)
