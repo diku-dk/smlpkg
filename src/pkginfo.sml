@@ -72,7 +72,7 @@ struct
   fun getManifestFromRepo (repo_dir:string) (refe:string) : Manifest.t =
       let val () = log ("reading manifest from " ^ repo_dir ^ " at " ^ refe)
           val manifest_file = Manifest.smlpkg_filename()
-          val cmd = "git --git-dir=" ^ System.shellEscape repo_dir ^ " show " ^ 
+          val cmd = "git " ^ "--git-dir=" ^ System.shellEscape repo_dir ^ " show " ^ 
                    System.shellEscape (refe ^ ":" ^ manifest_file)
           val (status,out,err) = System.command cmd
           val () = if OS.Process.isSuccess status then ()

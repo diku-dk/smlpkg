@@ -57,14 +57,20 @@ fun installInDir (bl:buildlist) (dir:filepath) : unit =
                 val tmpdir = OS.FileSys.tmpName() ^ "-smlpkg-install"
                 val () = log ("cloning to temporary directory " ^ tmpdir)
                 (* Try shallow clone with branch first, fall back to full clone if that fails *)
-                val clone_cmd = "git clone --depth 1 --branch " ^ System.shellEscape refe ^ 
-                               " " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir ^ 
-                               " 2>/dev/null || git clone " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir
-                val (status,out,err) = System.command clone_cmd
-                val () = if OS.Process.isSuccess status then ()
-                        else raise Fail ("Failed to clone " ^ repo_url ^ " @ " ^ refe ^ ": " ^ err)
-                (* Checkout the specific ref if needed *)
-                val checkout_cmd = "cd " ^ System.shellEscape tmpdir ^ " && git checkout " ^ System.shellEscape refe
+                val shallow_clone_cmd = "git clone --depth 1 --branch " ^ System.shellEscape refe ^ 
+                                       " " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir
+                val (status,out,err) = System.command shallow_clone_cmd
+                val clone_status = 
+                    if OS.Process.isSuccess status then status
+                    else (* Fall back to full clone *)
+                        let val () = log ("shallow clone failed, trying full clone")
+                            val full_clone_cmd = "git clone " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir
+                            val (st2,o2,e2) = System.command full_clone_cmd
+                        in if OS.Process.isSuccess st2 then st2
+                           else raise Fail ("Failed to clone " ^ repo_url ^ ": " ^ e2)
+                        end
+                (* Checkout the specific ref *)
+                val checkout_cmd = "git -C " ^ System.shellEscape tmpdir ^ " checkout " ^ System.shellEscape refe
                 val (status2,out2,err2) = System.command checkout_cmd
                 val () = if OS.Process.isSuccess status2 then ()
                         else raise Fail ("Failed to checkout " ^ refe ^ ": " ^ err2)
@@ -72,9 +78,8 @@ fun installInDir (bl:buildlist) (dir:filepath) : unit =
                 val src = tmpdir </> from_dir
                 val () = log ("copying " ^ src ^ " to " ^ pdir)
                 val () = System.createDirectoryIfMissing true pdir
-                (* Use find and cp to reliably copy all files, including hidden ones *)
-                val copy_cmd = "find " ^ System.shellEscape src ^ " -mindepth 1 -maxdepth 1 -exec cp -r {} " ^ 
-                              System.shellEscape pdir ^ "/ \\;"
+                (* Use cp -r to copy all files *)
+                val copy_cmd = "cp -r " ^ System.shellEscape (src ^ "/.") ^ " " ^ System.shellEscape pdir ^ "/"
                 val (status3,out3,err3) = System.command copy_cmd
                 val () = if OS.Process.isSuccess status3 then ()
                         else raise Fail ("Failed to copy package files: " ^ err3)
