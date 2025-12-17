@@ -56,11 +56,15 @@ struct
                raise Fail ("Failed to execute git command '" ^ cmd ^ "'"))
       end
 
-  (* Clone a git repository to a temporary directory and return the path *)
+  (* Clone a git repository to a temporary directory and return the path.
+     Note: We keep these clones around as a cache for subsequent operations. *)
   fun cloneRepo (repo_url:string) : string =
       let val tmpdir = OS.FileSys.tmpName() ^ "-smlpkg-repo"
           val () = log ("cloning repository " ^ repo_url ^ " to " ^ tmpdir)
-          val _ = gitCmd ["clone", "--bare", repo_url, tmpdir]
+          val cmd = "git clone --bare " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir
+          val (status,out,err) = System.command cmd
+          val () = if OS.Process.isSuccess status then ()
+                  else raise Fail ("Failed to clone " ^ repo_url ^ ": " ^ err)
       in tmpdir
       end
 
@@ -68,12 +72,13 @@ struct
   fun getManifestFromRepo (repo_dir:string) (refe:string) : Manifest.t =
       let val () = log ("reading manifest from " ^ repo_dir ^ " at " ^ refe)
           val manifest_file = Manifest.smlpkg_filename()
-          val cmd = ["--git-dir=" ^ repo_dir, "show", refe ^ ":" ^ manifest_file]
-          val s = gitCmd cmd
-                  handle Fail e =>
-                         raise Fail ("Failed to read " ^ manifest_file ^ " at " ^ refe ^ ":\n" ^ e)
+          val cmd = "git --git-dir=" ^ System.shellEscape repo_dir ^ " show " ^ 
+                   System.shellEscape (refe ^ ":" ^ manifest_file)
+          val (status,out,err) = System.command cmd
+          val () = if OS.Process.isSuccess status then ()
+                  else raise Fail ("Failed to read " ^ manifest_file ^ " at " ^ refe ^ ": " ^ err)
           val path = repo_dir ^ "/" ^ refe ^ "/" ^ manifest_file
-      in Manifest.fromString path s
+      in Manifest.fromString path out
       end
 
   (* Manifest cache to avoid reading the same manifest multiple times *)

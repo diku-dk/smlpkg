@@ -57,14 +57,14 @@ fun installInDir (bl:buildlist) (dir:filepath) : unit =
                 val tmpdir = OS.FileSys.tmpName() ^ "-smlpkg-install"
                 val () = log ("cloning to temporary directory " ^ tmpdir)
                 (* Try shallow clone with branch first, fall back to full clone if that fails *)
-                val clone_cmd = "git clone --depth 1 --branch " ^ refe ^ 
-                               " " ^ repo_url ^ " " ^ tmpdir ^ 
-                               " 2>/dev/null || git clone " ^ repo_url ^ " " ^ tmpdir
+                val clone_cmd = "git clone --depth 1 --branch " ^ System.shellEscape refe ^ 
+                               " " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir ^ 
+                               " 2>/dev/null || git clone " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir
                 val (status,out,err) = System.command clone_cmd
                 val () = if OS.Process.isSuccess status then ()
                         else raise Fail ("Failed to clone " ^ repo_url ^ " @ " ^ refe ^ ": " ^ err)
                 (* Checkout the specific ref if needed *)
-                val checkout_cmd = "cd " ^ tmpdir ^ " && git checkout " ^ refe
+                val checkout_cmd = "cd " ^ System.shellEscape tmpdir ^ " && git checkout " ^ System.shellEscape refe
                 val (status2,out2,err2) = System.command checkout_cmd
                 val () = if OS.Process.isSuccess status2 then ()
                         else raise Fail ("Failed to checkout " ^ refe ^ ": " ^ err2)
@@ -72,9 +72,12 @@ fun installInDir (bl:buildlist) (dir:filepath) : unit =
                 val src = tmpdir </> from_dir
                 val () = log ("copying " ^ src ^ " to " ^ pdir)
                 val () = System.createDirectoryIfMissing true pdir
-                val (status2,out2,err2) = System.command ("cp -r " ^ src ^ "/* " ^ pdir ^ "/")
-                val () = if OS.Process.isSuccess status2 then ()
-                        else raise Fail ("Failed to copy package files: " ^ err2)
+                (* Use find and cp to reliably copy all files, including hidden ones *)
+                val copy_cmd = "find " ^ System.shellEscape src ^ " -mindepth 1 -maxdepth 1 -exec cp -r {} " ^ 
+                              System.shellEscape pdir ^ "/ \\;"
+                val (status3,out3,err3) = System.command copy_cmd
+                val () = if OS.Process.isSuccess status3 then ()
+                        else raise Fail ("Failed to copy package files: " ^ err3)
                 (* Clean up temporary directory *)
                 val () = log ("removing temporary directory " ^ tmpdir)
                 val () = System.removePathForcibly tmpdir
