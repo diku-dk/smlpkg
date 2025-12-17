@@ -33,35 +33,56 @@ val smlpkg_filename = Manifest.smlpkg_filename
 (* Installing packages *)
 
 fun installInDir (bl:buildlist) (dir:filepath) : unit =
-    let fun unpack (p,v) =
+    let fun install (p,v) =
             let val info = PkgInfo.lookupPackageRev p v
-                val zipurl = PkgInfo.pkgRevZipballUrl info
-                val () = log ("downloading " ^ zipurl)
-                val a = Zip.download zipurl
+                val repo_url = PkgInfo.pkgRevRepoUrl info
+                val refe = PkgInfo.pkgRevRef info
+                val () = log ("cloning " ^ repo_url ^ " @ " ^ refe)
                 val m = PkgInfo.pkgRevGetManifest info
-                (* Compute the directory in the zipball that should contain the
+                (* Compute the directory in the repository that contains the
                    package files. *)
                 val from_dir =
                     case Manifest.pkg_dir m of
-                        SOME d => PkgInfo.pkgRevZipballDir info </> d
+                        SOME d => d
                       | NONE => raise Fail (smlpkg_filename() ^ " for "
                                             ^ Manifest.pkgpathToString p ^ "-"
                                             ^ SemVer.toString v
                                             ^ " does not define a package path.")
                 (* The directory in the local file system that will contain the
-                   package files  . *)
+                   package files. *)
                 val pdir = dir </> Manifest.pkgpathToString p
-            (* Remove any existing directory for this package.  This is a bit
-               inefficient, as the likelihood that the old ``lib`` directory
-               already contains the correct version is rather high.  We should
-               have a way to recognise this situation, and not download the
-               zipball in that case. *)
-            in System.removePathForcibly pdir
-             ; Zip.extractSubDir {log=log} a {path=from_dir,target=pdir}
+                (* Remove any existing directory for this package. *)
+                val () = System.removePathForcibly pdir
+                (* Clone the repository to a temporary location *)
+                val tmpdir = OS.FileSys.tmpName() ^ "-smlpkg-install"
+                val () = log ("cloning to temporary directory " ^ tmpdir)
+                (* Try shallow clone with branch first, fall back to full clone if that fails *)
+                val clone_cmd = "git clone --depth 1 --branch " ^ refe ^ 
+                               " " ^ repo_url ^ " " ^ tmpdir ^ 
+                               " 2>/dev/null || git clone " ^ repo_url ^ " " ^ tmpdir
+                val (status,out,err) = System.command clone_cmd
+                val () = if OS.Process.isSuccess status then ()
+                        else raise Fail ("Failed to clone " ^ repo_url ^ " @ " ^ refe ^ ": " ^ err)
+                (* Checkout the specific ref if needed *)
+                val checkout_cmd = "cd " ^ tmpdir ^ " && git checkout " ^ refe
+                val (status2,out2,err2) = System.command checkout_cmd
+                val () = if OS.Process.isSuccess status2 then ()
+                        else raise Fail ("Failed to checkout " ^ refe ^ ": " ^ err2)
+                (* Copy the package directory to the target location *)
+                val src = tmpdir </> from_dir
+                val () = log ("copying " ^ src ^ " to " ^ pdir)
+                val () = System.createDirectoryIfMissing true pdir
+                val (status2,out2,err2) = System.command ("cp -r " ^ src ^ "/* " ^ pdir ^ "/")
+                val () = if OS.Process.isSuccess status2 then ()
+                        else raise Fail ("Failed to copy package files: " ^ err2)
+                (* Clean up temporary directory *)
+                val () = log ("removing temporary directory " ^ tmpdir)
+                val () = System.removePathForcibly tmpdir
+            in ()
             end
         val list = M.toList bl
-    in List.app unpack list
-     ; log (Int.toString (length list) ^ " packages extracted")
+    in List.app install list
+     ; log (Int.toString (length list) ^ " packages installed")
     end
 
 val (libDir:filepath, libNewDir:filepath, libOldDir:filepath) =

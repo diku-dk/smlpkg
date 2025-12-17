@@ -4,8 +4,8 @@ signature PKG_INFO = sig
   type semver = SemVer.t
 
   type pkg_revinfo
-  val pkgRevZipballUrl    : pkg_revinfo -> string
-  val pkgRevZipballDir    : pkg_revinfo -> string
+  val pkgRevRepoUrl       : pkg_revinfo -> string
+  val pkgRevRef           : pkg_revinfo -> string
   val pkgRevCommit        : pkg_revinfo -> string
   val pkgRevGetManifest   : pkg_revinfo -> Manifest.t   (* cached access *)
   val pkgRevTime          : pkg_revinfo -> Time.time

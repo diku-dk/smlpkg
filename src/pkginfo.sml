@@ -12,14 +12,14 @@ struct
   type semver = SemVer.t
 
   type pkg_revinfo =
-       {pkgRevZipballUrl  : string,
-        pkgRevZipballDir  : string,               (* the directory inside zipball containing the 'lib' dir *)
+       {pkgRevRepoUrl     : string,               (* git repository URL *)
+        pkgRevRef         : string,               (* git ref (tag or commit) *)
         pkgRevCommit      : string,               (* commit id for verification *)
         pkgRevGetManifest : unit -> Manifest.t,
         pkgRevTime        : Time.time}
 
-  fun pkgRevZipballUrl (r:pkg_revinfo) : string = #pkgRevZipballUrl r
-  fun pkgRevZipballDir (r:pkg_revinfo) : string = #pkgRevZipballDir r
+  fun pkgRevRepoUrl (r:pkg_revinfo) : string = #pkgRevRepoUrl r
+  fun pkgRevRef (r:pkg_revinfo) : string = #pkgRevRef r
   fun pkgRevCommit (r:pkg_revinfo) : string = #pkgRevCommit r
   fun pkgRevGetManifest (r:pkg_revinfo) : Manifest.t = #pkgRevGetManifest r ()
   fun pkgRevTime (r:pkg_revinfo) : Time.time = #pkgRevTime r
@@ -44,14 +44,6 @@ struct
       end
 
   (* Utilities *)
-  fun httpRequest (url:string) : string =
-      let val cmd = "curl -L " ^ url
-          val (status,out,err) = System.command cmd
-      in if OS.Process.isSuccess status then out
-         else (TextIO.output(TextIO.stdErr,err);
-               raise Fail ("Failed to execute http request using curl: '" ^ cmd ^ "'"))
-      end
-
   fun gitCmd (opts : string list) : string =           (* may raise Fail and print errors on stderr *)
       let val cmd = String.concatWith " " ("git"::opts)
 (*
@@ -64,58 +56,66 @@ struct
                raise Fail ("Failed to execute git command '" ^ cmd ^ "'"))
       end
 
-  (* The GitLab and GitHub interactions are very similar, so we define a
-     couple of generic functions that are used to implement support for
-     both. *)
+  (* Clone a git repository to a temporary directory and return the path *)
+  fun cloneRepo (repo_url:string) : string =
+      let val tmpdir = OS.FileSys.tmpName() ^ "-smlpkg-repo"
+          val () = log ("cloning repository " ^ repo_url ^ " to " ^ tmpdir)
+          val _ = gitCmd ["clone", "--bare", repo_url, tmpdir]
+      in tmpdir
+      end
 
-  fun ghglRevGetManifest (url:string) (owner:string) (repo:string) (tag:string) : Manifest.t =
-      let val () = log ("downloading package manifest from " ^ url)
-          val path = owner ^ "/" ^ repo ^ "@" ^ tag ^ "/" ^ Manifest.smlpkg_filename()
-          val s = httpRequest url
+  (* Get the manifest from a git repository at a specific ref *)
+  fun getManifestFromRepo (repo_dir:string) (refe:string) : Manifest.t =
+      let val () = log ("reading manifest from " ^ repo_dir ^ " at " ^ refe)
+          val manifest_file = Manifest.smlpkg_filename()
+          val cmd = ["--git-dir=" ^ repo_dir, "show", refe ^ ":" ^ manifest_file]
+          val s = gitCmd cmd
                   handle Fail e =>
-                         raise Fail ("Network error when reading " ^ path ^ ":\n" ^ e)
+                         raise Fail ("Failed to read " ^ manifest_file ^ " at " ^ refe ^ ":\n" ^ e)
+          val path = repo_dir ^ "/" ^ refe ^ "/" ^ manifest_file
       in Manifest.fromString path s
       end
 
+  (* Manifest cache to avoid reading the same manifest multiple times *)
   val cache =
       let val m : (string * Manifest.t) list ref = ref nil
-      in fn f => fn a => fn b => fn c => fn d => fn () =>
-            let val s = String.concatWith "/" [a,b,c,d]
+      in fn f => fn repo_dir => fn refe => fn () =>
+            let val s = repo_dir ^ "@" ^ refe
             in case List.find (fn (k,_) => k=s) (!m) of
                    SOME (_,v) => v
-                 | NONE => let val v = f a b c d
+                 | NONE => let val v = f repo_dir refe
                            in m := (s,v) :: !m
                             ; v
                            end
             end
       end
 
-  fun ghglLookupCommit (archive_url:string) (manifest_url:string)
-                       (owner:string) (repo:string) (d:string)
-                       (tag:string) (hash:string) (version_prefix:string)
-      : pkg_revinfo =
-      let val mc = cache ghglRevGetManifest manifest_url owner repo tag
-          val dir = repo ^ "-" ^ version_prefix ^ d
+  (* Create a pkg_revinfo for a specific git ref *)
+  fun mkRevInfo (repo_url:string) (repo_dir:string) (refe:string) (hash:string) : pkg_revinfo =
+      let val mc = cache getManifestFromRepo repo_dir refe
           val time = Time.now()
-          val () = log ("zip url: " ^ archive_url)
-          val () = log ("zip dir: " ^ dir)
-      in {pkgRevZipballUrl=archive_url,
-          pkgRevZipballDir=dir,
+          val () = log ("rev info: " ^ repo_url ^ " @ " ^ refe ^ " (" ^ hash ^ ")")
+      in {pkgRevRepoUrl=repo_url,
+          pkgRevRef=refe,
           pkgRevCommit=hash,
           pkgRevGetManifest=mc,
           pkgRevTime=time}
       end
 
-  fun ghglPkgInfo (repo_url:string) mk_archive_url mk_manifest_url
-                  (owner:string) (repo:string) (versions:int list)
-                  (version_prefix:string) : pkg_info =
+  (* Get package info from a git repository *)
+  fun gitPkgInfo (repo_url:string) (versions:int list) : pkg_info =
       let val () = log ("retrieving list of tags from " ^ repo_url)
           val remote_lines = gitCmd ["ls-remote", repo_url]
           val remote_lines = String.tokens (fn c => c = #"\n") remote_lines
+          
+          (* Clone the repository once for reading manifests *)
+          val repo_dir = cloneRepo repo_url
+          
           fun isHeadRef (l:string) : string option =
               case String.tokens Char.isSpace l of
                   [hash,"HEAD"] => SOME hash
                 | _ => NONE
+          
           fun revInfo l : (semver * pkg_revinfo) option =
               case String.tokens Char.isSpace l of
                   [hash,refe] =>
@@ -126,8 +126,7 @@ struct
                               SOME v =>
                               let val m = SemVer.major v
                               in if List.exists (fn i => i=m) versions then
-                                   let val pinfo = ghglLookupCommit (mk_archive_url t) (mk_manifest_url t)
-                                                                    owner repo (SemVer.toString v) t hash version_prefix
+                                   let val pinfo = mkRevInfo repo_url repo_dir t hash
                                    in SOME (v,pinfo)
                                    end
                                  else NONE
@@ -141,31 +140,11 @@ struct
              let fun def (opt:string option) : string = Option.getOpt(opt,head_ref)
                  val rev_info = M.fromList_eq (List.mapPartial revInfo remote_lines)
                  fun lookupCommit (r:string option) =
-                     ghglLookupCommit (mk_archive_url (def r)) (mk_manifest_url (def r))
-                                      owner repo (def r) (def r) (def r) version_prefix
+                     mkRevInfo repo_url repo_dir (def r) (def r)
              in {pkgVersions=rev_info,
                  pkgLookupCommit=lookupCommit}
              end
            | _ => raise Fail ("Cannot find HEAD ref for " ^ repo_url)
-      end
-
-  fun ghPkgInfo (owner:string) (repo:string) (versions:int list) : pkg_info =
-      let val repo_url = "https://github.com/" ^ owner ^ "/" ^ repo
-          fun mk_archive_url r = repo_url ^ "/archive/" ^ r ^ ".zip"
-          fun mk_manifest_url r = "https://raw.githubusercontent.com/" ^
-                                  owner ^ "/" ^ repo ^ "/" ^
-                                  r ^ "/" ^ Manifest.smlpkg_filename()
-      in ghglPkgInfo repo_url mk_archive_url mk_manifest_url owner repo versions ""
-      end
-
-  fun glPkgInfo (owner:string) (repo:string) (versions:int list) : pkg_info =
-      let val base_url = "https://gitlab.com/" ^ owner ^ "/" ^ repo
-          val repo_url = base_url ^ ".git"
-          fun mk_archive_url r = base_url ^ "/-/archive/" ^ r ^
-                                 "/" ^ repo ^ "-" ^ r ^ ".zip"
-          fun mk_manifest_url r = base_url ^ "/raw/" ^
-                                  r ^ "/" ^ Manifest.smlpkg_filename()
-      in ghglPkgInfo repo_url mk_archive_url mk_manifest_url owner repo versions "v"
       end
 
   (* Retrieve information about a package based on its package path.
@@ -175,20 +154,22 @@ struct
      @github.com/user/repo/v2@ will match 2.* tags, and so forth..
    *)
 
+  (* Construct repository URL from package path *)
+  fun pkgpathToRepoUrl (p:pkgpath) : string =
+      let val (p',_) = majorRevOfPkg p
+          val base = "https://" ^ #host p ^ "/" ^ #owner p ^ "/" ^ #repo p'
+      in case #host p of
+             "gitlab.com" => base ^ ".git"
+           | _ => base  (* Works for github.com and most other git hosts *)
+      end
+
   (* Raw access - limited caching *)
 
   fun pkgInfo (p:pkgpath) : pkg_info =
-      case #host p of
-          "github.com" =>
-          let val (p',vs) = majorRevOfPkg p
-          in ghPkgInfo (#owner p) (#repo p') vs
-          end
-        | "gitlab.com" =>
-          let val (p',vs) = majorRevOfPkg p
-          in glPkgInfo (#owner p) (#repo p') vs
-          end
-        | _ => raise Fail ("only github.com or gitlab.com\
-                           \ are supported as hosts.")
+      let val repo_url = pkgpathToRepoUrl p
+          val (_,vs) = majorRevOfPkg p
+      in gitPkgInfo repo_url vs
+      end
 
   (* Cached access *)
 
