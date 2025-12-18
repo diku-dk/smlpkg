@@ -56,16 +56,50 @@ struct
                raise Fail ("Failed to execute git command '" ^ cmd ^ "'"))
       end
 
-  (* Clone a git repository to a temporary directory and return the path.
-     Note: We keep these clones around as a cache for subsequent operations. *)
+  (* Shared temporary directory for all repository clones during this execution *)
+  val cacheDir : string option ref = ref NONE
+  
+  fun getCacheDir () : string =
+      case !cacheDir of
+          SOME dir => dir
+        | NONE =>
+          let val dir = OS.FileSys.tmpName() ^ "-smlpkg-cache"
+              val () = if System.doesDirExist dir then ()
+                      else OS.FileSys.mkDir dir
+              val () = log ("created cache directory " ^ dir)
+              val () = cacheDir := SOME dir
+          in dir
+          end
+
+  (* Convert repository URL to a safe directory name *)
+  fun repoUrlToDir (repo_url:string) : string =
+      let fun sanitize #"/" = #"-"
+            | sanitize #":" = #"-"
+            | sanitize #"@" = #"-"
+            | sanitize #"." = #"-"
+            | sanitize c = c
+      in String.map sanitize repo_url
+      end
+
+  (* Clone a git repository to the cache directory and return the path.
+     If the repository already exists in the cache, reuse it. *)
   fun cloneRepo (repo_url:string) : string =
-      let val tmpdir = OS.FileSys.tmpName() ^ "-smlpkg-repo"
-          val () = log ("cloning repository " ^ repo_url ^ " to " ^ tmpdir)
-          val cmd = "git clone --bare " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir
-          val (status,out,err) = System.command cmd
-          val () = if OS.Process.isSuccess status then ()
-                  else raise Fail ("Failed to clone " ^ repo_url ^ ": " ^ err)
-      in tmpdir
+      let infix </>
+          val op </> = System.</>
+          val cache_dir = getCacheDir()
+          val repo_name = repoUrlToDir repo_url
+          val repo_dir = cache_dir </> repo_name
+      in if System.doesDirExist repo_dir then
+           ( log ("reusing cached repository " ^ repo_dir)
+           ; repo_dir )
+         else
+           ( log ("cloning repository " ^ repo_url ^ " to " ^ repo_dir)
+           ; let val cmd = "git clone --bare " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape repo_dir
+                 val (status,out,err) = System.command cmd
+                 val () = if OS.Process.isSuccess status then ()
+                         else raise Fail ("Failed to clone " ^ repo_url ^ ": " ^ err)
+             in repo_dir
+             end )
       end
 
   (* Get the manifest from a git repository at a specific ref *)
