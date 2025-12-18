@@ -280,4 +280,15 @@ struct
                end
         end
   end
+
+  (* Cache management functions *)
+  fun getCachedRepo (repo_url:string) : string = cloneRepo repo_url
+  
+  fun cleanupCache () : unit =
+      case !cacheDir of
+          NONE => ()
+        | SOME dir =>
+          ( log ("cleaning up cache directory " ^ dir)
+          ; System.removePathForcibly dir
+          ; cacheDir := NONE )
 end

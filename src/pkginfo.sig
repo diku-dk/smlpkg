@@ -20,5 +20,9 @@ signature PKG_INFO = sig
   val lookupPackageRev    : pkgpath -> semver -> pkg_revinfo
   val lookupNewestRev     : pkgpath -> semver
 
+  (* Cache management *)
+  val getCachedRepo       : string -> string  (* Get cached repository for URL *)
+  val cleanupCache        : unit -> unit       (* Clean up temporary cache directory *)
+
   val verboseFlag         : bool ref
 end

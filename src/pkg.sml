@@ -53,27 +53,20 @@ fun installInDir (bl:buildlist) (dir:filepath) : unit =
                 val pdir = dir </> Manifest.pkgpathToString p
                 (* Remove any existing directory for this package. *)
                 val () = System.removePathForcibly pdir
-                (* Clone the repository to a temporary location *)
+                (* Get the cached bare repository *)
+                val bare_repo = PkgInfo.getCachedRepo repo_url
+                (* Extract files from the bare repository to a temporary location *)
                 val tmpdir = OS.FileSys.tmpName() ^ "-smlpkg-install"
-                val () = log ("cloning to temporary directory " ^ tmpdir)
-                (* Try shallow clone with branch first, fall back to full clone if that fails *)
-                val shallow_clone_cmd = "git clone --depth 1 --branch " ^ System.shellEscape refe ^ 
-                                       " " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir
-                val (status,out,err) = System.command shallow_clone_cmd
-                val clone_status = 
-                    if OS.Process.isSuccess status then status
-                    else (* Fall back to full clone *)
-                        let val () = log ("shallow clone failed, trying full clone")
-                            val full_clone_cmd = "git clone " ^ System.shellEscape repo_url ^ " " ^ System.shellEscape tmpdir
-                            val (st2,o2,e2) = System.command full_clone_cmd
-                        in if OS.Process.isSuccess st2 then st2
-                           else raise Fail ("Failed to clone " ^ repo_url ^ ": " ^ e2)
-                        end
-                (* Checkout the specific ref *)
-                val checkout_cmd = "git -C " ^ System.shellEscape tmpdir ^ " checkout " ^ System.shellEscape refe
-                val (status2,out2,err2) = System.command checkout_cmd
-                val () = if OS.Process.isSuccess status2 then ()
-                        else raise Fail ("Failed to checkout " ^ refe ^ ": " ^ err2)
+                val () = log ("extracting " ^ refe ^ " to temporary directory " ^ tmpdir)
+                val () = if System.doesDirExist tmpdir then ()
+                        else OS.FileSys.mkDir tmpdir
+                (* Use git archive to extract the specific ref *)
+                val archive_cmd = "git --git-dir=" ^ System.shellEscape bare_repo ^ 
+                                 " archive " ^ System.shellEscape refe ^ 
+                                 " | tar -x -C " ^ System.shellEscape tmpdir
+                val (status,out,err) = System.command archive_cmd
+                val () = if OS.Process.isSuccess status then ()
+                        else raise Fail ("Failed to extract " ^ refe ^ " from " ^ repo_url ^ ": " ^ err)
                 (* Copy the package directory to the target location *)
                 val src = tmpdir </> from_dir
                 val () = log ("copying " ^ src ^ " to " ^ pdir)
@@ -400,15 +393,17 @@ fun main (pkg_filename:string) : unit =
                       String.concatWith "|" (map #1 commands)
                       ^ ">")
     in
-      case eatFlags (CommandLine.arguments()) of
-          [] => doUsage()
-        | cmd :: args =>
-          case look cmd commands of
-              SOME (doCmd,doc) =>
-              (doCmd args
-               handle Fail s => (println ("Error: " ^ s);
-                                 simpleUsage()))
-            | NONE => doUsage()
+      ( case eatFlags (CommandLine.arguments()) of
+            [] => doUsage()
+          | cmd :: args =>
+            case look cmd commands of
+                SOME (doCmd,doc) =>
+                (doCmd args
+                 handle Fail s => (println ("Error: " ^ s);
+                                   simpleUsage()))
+              | NONE => doUsage()
+      ; PkgInfo.cleanupCache() )
+      handle e => (PkgInfo.cleanupCache(); raise e)
     end
 
 end
