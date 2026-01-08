@@ -3,5 +3,4 @@ in finmapeq.sig
    finmapeq.sml
    system.sig
    system.sml
-   zip.sml
 end
