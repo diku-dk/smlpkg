@@ -12,6 +12,7 @@ signature SYSTEM = sig
   val writeFileBin             : filepath -> Word8Vector.vector -> unit
 
   val command                  : string -> OS.Process.status * string * string
+  val shellEscape              : string -> string
 
   val splitPath                : path -> string list
   val createDirectoryIfMissing : bool -> dirpath -> unit

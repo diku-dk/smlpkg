@@ -2,5 +2,4 @@ local $(SML_LIB)/basis/basis.mlb
       util.mlb
 in test.sml
    test_system.sml
-   test_zip.mlb
 end

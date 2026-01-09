@@ -4,8 +4,8 @@ signature PKG_INFO = sig
   type semver = SemVer.t
 
   type pkg_revinfo
-  val pkgRevZipballUrl    : pkg_revinfo -> string
-  val pkgRevZipballDir    : pkg_revinfo -> string
+  val pkgRevRepoUrl       : pkg_revinfo -> string
+  val pkgRevRef           : pkg_revinfo -> string
   val pkgRevCommit        : pkg_revinfo -> string
   val pkgRevGetManifest   : pkg_revinfo -> Manifest.t   (* cached access *)
   val pkgRevTime          : pkg_revinfo -> Time.time
@@ -19,6 +19,10 @@ signature PKG_INFO = sig
   val lookupPackageCommit : pkgpath -> string option -> semver * pkg_revinfo
   val lookupPackageRev    : pkgpath -> semver -> pkg_revinfo
   val lookupNewestRev     : pkgpath -> semver
+
+  (* Cache management *)
+  val getCachedRepo       : string -> string  (* Get cached repository for URL *)
+  val cleanupCache        : unit -> unit       (* Clean up temporary cache directory *)
 
   val verboseFlag         : bool ref
 end

@@ -37,6 +37,11 @@ fun writeFileBin (f:filepath) (s: Word8Vector.vector) : unit =
     end
 
 (* Command execution *)
+
+(* Escape a string for safe use in shell commands *)
+fun shellEscape (s: string) : string =
+    "'" ^ String.translate (fn #"'" => "'\"'\"'" | c => String.str c) s ^ "'"
+
 fun command (cmd: string) : P.status * string * string =
     let val stdoutFile = FS.tmpName()
         val stderrFile = FS.tmpName()
