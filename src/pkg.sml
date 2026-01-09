@@ -60,25 +60,34 @@ fun installInDir (bl:buildlist) (dir:filepath) : unit =
                 val () = log ("extracting " ^ refe ^ " to temporary directory " ^ tmpdir)
                 val () = if System.doesDirExist tmpdir then ()
                         else OS.FileSys.mkDir tmpdir
-                (* Use git archive to extract the specific ref *)
-                val archive_cmd = "git --git-dir=" ^ System.shellEscape bare_repo ^ 
-                                 " archive " ^ System.shellEscape refe ^ 
-                                 " | tar -x -C " ^ System.shellEscape tmpdir
-                val (archive_status, archive_out, archive_err) = System.command archive_cmd
-                val () = if OS.Process.isSuccess archive_status then ()
-                        else raise Fail ("Failed to extract " ^ refe ^ " from " ^ repo_url ^ ": " ^ archive_err)
-                (* Copy the package directory to the target location *)
-                val src = tmpdir </> from_dir
-                val () = log ("copying " ^ src ^ " to " ^ pdir)
-                val () = System.createDirectoryIfMissing true pdir
-                (* Use cp -r to copy all files *)
-                val copy_cmd = "cp -r " ^ System.shellEscape (src ^ "/.") ^ " " ^ System.shellEscape pdir ^ "/"
-                val (copy_status, copy_out, copy_err) = System.command copy_cmd
-                val () = if OS.Process.isSuccess copy_status then ()
-                        else raise Fail ("Failed to copy package files: " ^ copy_err)
-                (* Clean up temporary directory *)
-                val () = log ("removing temporary directory " ^ tmpdir)
-                val () = System.removePathForcibly tmpdir
+                (* Perform extraction, copying, and cleanup, ensuring tmpdir is removed on failure. *)
+                val () =
+                    (   (* Use git archive to extract the specific ref *)
+                        val archive_cmd = "git --git-dir=" ^ System.shellEscape bare_repo ^ 
+                                         " archive " ^ System.shellEscape refe ^ 
+                                         " | tar -x -C " ^ System.shellEscape tmpdir
+                        val (status,out,err) = System.command archive_cmd
+                        val () = if OS.Process.isSuccess status then ()
+                                 else raise Fail ("Failed to extract " ^ refe ^ " from " ^ repo_url ^ ": " ^ err)
+                        (* Copy the package directory to the target location *)
+                        val src = tmpdir </> from_dir
+                        val () = log ("copying " ^ src ^ " to " ^ pdir)
+                        val () = System.createDirectoryIfMissing true pdir
+                        (* Use cp -r to copy all files *)
+                        val copy_cmd = "cp -r " ^ System.shellEscape (src ^ "/.") ^ " " ^ System.shellEscape pdir ^ "/"
+                        val (status3,out3,err3) = System.command copy_cmd
+                        val () = if OS.Process.isSuccess status3 then ()
+                                 else raise Fail ("Failed to copy package files: " ^ err3)
+                        (* Clean up temporary directory on success *)
+                        val () = log ("removing temporary directory " ^ tmpdir)
+                        val () = System.removePathForcibly tmpdir
+                    in
+                        ()
+                    end
+                    handle e =>
+                           (log ("removing temporary directory " ^ tmpdir);
+                            System.removePathForcibly tmpdir;
+                            raise e)
             in ()
             end
         val list = M.toList bl
