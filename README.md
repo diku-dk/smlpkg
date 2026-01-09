@@ -5,7 +5,7 @@ libraries and programs. The package manager assumes nothing and knows
 nothing about the Standard ML compilers used and is thus quite
 generic.
 
-The package manager is centered around the notion of [semantic versioning](https://semver.org/) and currently supports packages
+The package manager is centered around the notion of [semantic versioning](https://semver.org/) and supports packages that, for instance, are
 hosted on [GitHub](https://github.com/) and
 [GitLab](https://about.gitlab.com/).
 
