@@ -400,6 +400,7 @@ fun main (pkg_filename:string) : unit =
                 SOME (doCmd,doc) =>
                 (doCmd args
                  handle Fail s => (println ("Error: " ^ s);
+                                   PkgInfo.cleanupCache();
                                    simpleUsage()))
               | NONE => doUsage()
       ; PkgInfo.cleanupCache() )
