@@ -64,18 +64,18 @@ fun installInDir (bl:buildlist) (dir:filepath) : unit =
                 val archive_cmd = "git --git-dir=" ^ System.shellEscape bare_repo ^ 
                                  " archive " ^ System.shellEscape refe ^ 
                                  " | tar -x -C " ^ System.shellEscape tmpdir
-                val (status,out,err) = System.command archive_cmd
-                val () = if OS.Process.isSuccess status then ()
-                        else raise Fail ("Failed to extract " ^ refe ^ " from " ^ repo_url ^ ": " ^ err)
+                val (archive_status, archive_out, archive_err) = System.command archive_cmd
+                val () = if OS.Process.isSuccess archive_status then ()
+                        else raise Fail ("Failed to extract " ^ refe ^ " from " ^ repo_url ^ ": " ^ archive_err)
                 (* Copy the package directory to the target location *)
                 val src = tmpdir </> from_dir
                 val () = log ("copying " ^ src ^ " to " ^ pdir)
                 val () = System.createDirectoryIfMissing true pdir
                 (* Use cp -r to copy all files *)
                 val copy_cmd = "cp -r " ^ System.shellEscape (src ^ "/.") ^ " " ^ System.shellEscape pdir ^ "/"
-                val (status3,out3,err3) = System.command copy_cmd
-                val () = if OS.Process.isSuccess status3 then ()
-                        else raise Fail ("Failed to copy package files: " ^ err3)
+                val (copy_status, copy_out, copy_err) = System.command copy_cmd
+                val () = if OS.Process.isSuccess copy_status then ()
+                        else raise Fail ("Failed to copy package files: " ^ copy_err)
                 (* Clean up temporary directory *)
                 val () = log ("removing temporary directory " ^ tmpdir)
                 val () = System.removePathForcibly tmpdir
