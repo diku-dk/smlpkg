@@ -144,11 +144,13 @@ struct
   (* Get package info from a git repository *)
   fun gitPkgInfo (repo_url:string) (versions:int list) : pkg_info =
       let val () = log ("retrieving list of tags from " ^ repo_url)
-          val remote_lines = gitCmd ["ls-remote", repo_url]
+          (* Escape the repository URL before passing it to shell-based helpers *)
+          val safe_repo_url = System.shellEscape repo_url
+          val remote_lines = gitCmd ["ls-remote", safe_repo_url]
           val remote_lines = String.tokens (fn c => c = #"\n") remote_lines
           
           (* Clone the repository once for reading manifests *)
-          val repo_dir = cloneRepo repo_url
+          val repo_dir = cloneRepo safe_repo_url
           
           fun isHeadRef (l:string) : string option =
               case String.tokens Char.isSpace l of
