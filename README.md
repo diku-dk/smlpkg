@@ -55,7 +55,12 @@ Remember to follow [semantic versioning](https://semver.org). Once a
 package has been released, other packages can safely add the package
 to their own source code tree using `smlpkg add` (see above).
 
-## Probably incomplete list of available packages
+The lists below constitute some available packages. The lists are divided into
+packages that are generic (should work with any Standard ML compiler that
+supports basis files) and packages that are supported only for particular
+compilers (e.g., MLKit, Mlton, and `polymlb`).
+
+## Generic packages
 
 * [![CI](https://github.com/diku-dk/futhark-data-sml/workflows/CI/badge.svg)](https://github.com/diku-dk/futhark-data-sml/actions) [github.com/diku-dk/futhark-data-sml](https://github.com/diku-dk/futhark-data-sml)
 * [![CI](https://github.com/diku-dk/futhark-server-sml/workflows/CI/badge.svg)](https://github.com/diku-dk/futhark-server-sml/actions) [github.com/diku-dk/futhark-server-sml](https://github.com/diku-dk/futhark-server-sml)
@@ -103,13 +108,24 @@ to their own source code tree using `smlpkg add` (see above).
   [github.com/diku-dk/sml-unicode](https://github.com/diku-dk/sml-unicode)
 * [![CI](https://github.com/diku-dk/sml-uref/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-uref/actions)
   [github.com/diku-dk/sml-uref](https://github.com/diku-dk/sml-uref)
-* [github.com/pzel/assert-polyml](https://github.com/pzel/assert-polyml)
 * [github.com/pzel/sml-either](https://github.com/pzel/sml-either)
-* [github.com/pzel/sqlite3-polyml](https://github.com/pzel/sqlite3-polyml)
 * [github.com/shwestrick/sml-audio](https://github.com/shwestrick/sml-audio)
 * [github.com/shwestrick/sml-uri](https://github.com/shwestrick/sml-uri)
 * [github.com/shwestrick/sml-parseq](https://github.com/shwestrick/sml-parseq)
 
+## MLKit packages
+
+* [![CI](https://github.com/melsman/mlkit-postgresql/workflows/CI/badge.svg)](https://github.com/melsman/mlkit-postgresql/actions)
+  [github.com/melsman/mlkit-postgresql](https://github.com/melsman/mlkit-postgresql)
+* [![CI](https://github.com/melsman/mlkit-ssl-socket/workflows/CI/badge.svg)](https://github.com/melsman/mlkit-ssl-socket/actions)
+  [github.com/melsman/mlkit-ssl-socket](https://github.com/melsman/mlkit-ssl-socket)
+* [![CI](https://github.com/diku-dk/sml-tigr/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-tigr/actions)
+  [github.com/diku-dk/sml-tigr](https://github.com/diku-dk/sml-tigr)
+
+## Polymlb packages
+
+* [github.com/pzel/assert-polyml](https://github.com/pzel/assert-polyml)
+* [github.com/pzel/sqlite3-polyml](https://github.com/pzel/sqlite3-polyml)
 
 ## Design details
 
