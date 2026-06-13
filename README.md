@@ -108,6 +108,7 @@ compilers (e.g., MLKit, Mlton, and `polymlb`).
   [github.com/diku-dk/sml-unicode](https://github.com/diku-dk/sml-unicode)
 * [![CI](https://github.com/diku-dk/sml-uref/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-uref/actions)
   [github.com/diku-dk/sml-uref](https://github.com/diku-dk/sml-uref)
+* [github.com/pzel/assert](https://github.com/pzel/assert)
 * [github.com/pzel/sml-either](https://github.com/pzel/sml-either)
 * [github.com/shwestrick/sml-audio](https://github.com/shwestrick/sml-audio)
 * [github.com/shwestrick/sml-uri](https://github.com/shwestrick/sml-uri)
@@ -124,7 +125,6 @@ compilers (e.g., MLKit, Mlton, and `polymlb`).
 
 ## Polymlb packages
 
-* [github.com/pzel/assert-polyml](https://github.com/pzel/assert-polyml)
 * [github.com/pzel/sqlite3-polyml](https://github.com/pzel/sqlite3-polyml)
 
 ## Design details
