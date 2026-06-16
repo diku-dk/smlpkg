@@ -249,9 +249,8 @@ struct
           | SOME pkgpath =>
               let
                 val pdir = "lib" </> Manifest.pkgpathToString pkgpath
-                val pdir_exists = OS.FileSys.isDir pdir
               in
-                if pdir_exists then ()
+                if System.doesDirExist pdir then ()
                 else raise Fail ("the directory " ^ pdir ^ " does not exist.")
               end
         end
