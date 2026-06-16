@@ -1,5 +1,8 @@
 local $(SML_LIB)/basis/basis.mlb
       util.mlb
-in test.sml
+in
+   ../test/preamble.sml
+   test.sml
    test_system.sml
+   ../test/postamble.sml
 end

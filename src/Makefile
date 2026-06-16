@@ -2,6 +2,10 @@ PKGVERSION=$(shell cat ../version.txt)
 
 MLCOMP ?= mlkit
 
+ifeq ($(MLCOMP), polymlb)
+MLCOMP=polymlb -ignore-call-main
+endif
+
 SMLFILES=$(shell find . -name '*.sml') $(shell find . -name '*.sig') $(shell find . -name '*.mlb')
 
 GITVERSION=$(shell git describe --abbrev --dirty --always --tags)

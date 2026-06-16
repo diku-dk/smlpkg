@@ -1,2 +1,2 @@
 
-val () = Pkg.main "futhark.pkg"
+fun main () = Pkg.main "futhark.pkg"

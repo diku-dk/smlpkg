@@ -1,10 +1,4 @@
-fun println s = print (s ^ "\n")
-
 val () = println "Testing FinMapEq"
-
-fun test s b =
-    println(if b then ("OK : " ^ s)
-            else ("ERR: " ^ s))
 
 open FinMapEq
 

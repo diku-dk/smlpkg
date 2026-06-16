@@ -4,5 +4,8 @@ local $(SML_LIB)/basis/basis.mlb
       ../util/util.mlb
       solve.sig
       solve.sml
-in test.sml
+in
+  ../test/preamble.sml
+  test.sml
+  ../test/postamble.sml
 end
