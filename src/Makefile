@@ -1,10 +1,15 @@
 PKGVERSION=$(shell cat ../version.txt)
 
 MLCOMP ?= mlkit
+MLCOMP_FLAGS ?=
 
 ifeq ($(MLCOMP), polymlb)
-MLCOMP=polymlb -ignore-call-main
+MLCOMP_FLAGS=-ignore-call-main
 endif
+ifeq ($(MLCOMP), mlkit)
+MLCOMP_FLAGS=--mlb-subdir $(shell mktemp -d)
+endif
+
 
 SMLFILES=$(shell find . -name '*.sml') $(shell find . -name '*.sig') $(shell find . -name '*.mlb')
 
@@ -14,10 +19,12 @@ GITVERSION=$(shell git describe --abbrev --dirty --always --tags)
 all: smlpkg futpkg
 
 smlpkg: smlpkg.mlb $(SMLFILES) version.gen.sml
-	$(MLCOMP) -output $@ $<
+	rm -rf MLB
+	$(MLCOMP) $(MLCOMP_FLAGS) -output $@ $<
 
 futpkg: futpkg.mlb $(SMLFILES)
-	$(MLCOMP) -output $@ $<
+	rm -rf MLB
+	$(MLCOMP) $(MLCOMP_FLAGS) -output $@ $<
 
 .PHONY: test
 test:
