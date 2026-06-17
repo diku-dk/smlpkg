@@ -78,13 +78,13 @@ fun isBrokenLink (p:path): bool =
     (* Broken links will always return false on FileSys.access
        and also on FileSys.isLink.
        However, they *will* resolve to the broken link path
-       with FileSys.readLink, so that's the only way I know of
+       with FileSys.readLink, so that's the only reliable way
        to detect them *)
     String.size(OS.FileSys.readLink p) > 0
     handle SysErr => false
 
 fun canBeRemoved (p:path) : bool =
-    (doesFileExist p orelse doesLinkExist p orelse isBrokenLink p)
+    doesFileExist p orelse doesLinkExist p orelse isBrokenLink p
 
 fun isEmptyDir (p:dirpath) : bool =
     if doesDirExist p
