@@ -153,7 +153,7 @@ fun removePathForcibly (p:path) : unit =
     if canBeRemoved p then OS.FileSys.remove p
     else if isEmptyDir p then OS.FileSys.rmDir p
     else if doesDirExist p then (app removePathForcibly (getDirectoryContents p)
-                                ; removePathForcibly p )
+                                ; OS.FileSys.rmDir p )
     else ()
 
 fun renameDirectory (old:dirpath) (new:dirpath) : unit =
