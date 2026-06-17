@@ -64,11 +64,35 @@ fun hasTrailingPathSeparator (p:string) : bool =
 infix </>
 fun x </> y = if x = "" then y else x ^ "/" ^ y
 
-fun doesFileExist (p:path) : bool =
-    OS.FileSys.access(p,[])
 
 fun doesDirExist (p:dirpath) : bool =
     OS.FileSys.access(p,[]) andalso OS.FileSys.isDir p
+
+fun doesFileExist (p:path) : bool =
+    OS.FileSys.access(p,[]) andalso not (doesDirExist p)
+
+fun doesLinkExist (p:path) : bool =
+    OS.FileSys.access(p,[]) andalso OS.FileSys.isLink p
+
+fun isBrokenLink (p:path): bool =
+    (* Broken links will always return false on FileSys.access
+       and also on FileSys.isLink.
+       However, they *will* resolve to the broken link path
+       with FileSys.readLink, so that's the only way I know of
+       to detect them *)
+    String.size(OS.FileSys.readLink p) > 0
+    handle SysErr => false
+
+fun canBeRemoved (p:path) : bool =
+    (doesFileExist p orelse doesLinkExist p orelse isBrokenLink p)
+
+fun isEmptyDir (p:dirpath) : bool =
+    if doesDirExist p
+    then let val stream = OS.FileSys.openDir p
+             val contents = OS.FileSys.readDir stream
+         in (not (Option.isSome contents)) before OS.FileSys.closeDir stream
+         end
+    else false
 
 fun createDirectoryIfMissing (also_parents:bool) (p:string) : unit =
     let fun check d =
@@ -114,18 +138,22 @@ fun makeRelative (f:dirpath) (p:path) : string =
               | loop _ = raise Fail ("makeRelative failed as " ^ f ^ " is not a subpath of " ^ p)
         in loop(splitPath f, splitPath p)
         end
-     | _ => raise Fail "makeRelative assumes relative directories as arguments"
+      | _ => raise Fail "makeRelative assumes relative directories as arguments"
+
+fun getDirectoryContents (d: dirpath) : path list =
+    (* returns fully-prefixed contents, like POSIX `find`, NOT like POSIX `ls` *)
+    let val stream = OS.FileSys.openDir d
+        fun getAll acc = case OS.FileSys.readDir stream of
+                             NONE => rev acc
+                           | SOME entry => getAll ((d </> entry)::acc)
+    in getAll [] before OS.FileSys.closeDir stream
+    end
 
 fun removePathForcibly (p:path) : unit =
-    if doesDirExist p then
-      let fun loop d = case OS.FileSys.readDir d of
-                           SOME p' => ( removePathForcibly (p </> p')
-                                      ; loop d )
-                         | NONE => OS.FileSys.closeDir d
-      in loop (OS.FileSys.openDir p)
-       ; OS.FileSys.rmDir p
-      end
-    else if doesFileExist p then OS.FileSys.remove p
+    if canBeRemoved p then OS.FileSys.remove p
+    else if isEmptyDir p then OS.FileSys.rmDir p
+    else if doesDirExist p then (app removePathForcibly (getDirectoryContents p)
+                                ; removePathForcibly p )
     else ()
 
 fun renameDirectory (old:dirpath) (new:dirpath) : unit =
