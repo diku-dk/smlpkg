@@ -1,4 +1,6 @@
 local $(SML_LIB)/basis/basis.mlb
       manifest.mlb
-in test.sml
+      ../test/testSuite.mlb
+in
+   test.sml
 end

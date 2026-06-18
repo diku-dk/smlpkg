@@ -1,2 +1,2 @@
 
-val () = Pkg.main "sml.pkg"
+fun main () = Pkg.main "sml.pkg"

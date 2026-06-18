@@ -1,5 +1,6 @@
 local $(SML_LIB)/basis/basis.mlb
+      ../test/testSuite.mlb
       util.mlb
-in test.sml
-   test_system.sml
+in
+   test.sml
 end

@@ -1,12 +1,5 @@
-
-fun println s = print (s ^ "\n")
-
+structure T = TestSuite (); open T
 val () = println "Testing Solve"
-
-fun test s f =
-    (if f() then print ("OK : " ^ s ^ "\n")
-     else print ("ERR: " ^ s ^ "\n"))
-    handle Fail e => print ("EXN: " ^ s ^ " raised Fail \"" ^ e ^ "\"\n")
 
 fun no_version p v =
     raise Fail ("cannot find version " ^ v ^ " for package " ^ p ^ ".")
@@ -74,28 +67,31 @@ fun solveManifest (m:Manifest.t) : string =
     in Solve.buildListToString bl
     end
 
-val () = test "solve1" (fn () => solveManifest m_repo10_0_1_0 = "{}")
+val () = testf "solve1" (fn () => solveManifest m_repo10_0_1_0 = "{}")
 
-val () = test "solve2" (fn () =>
+val () = testf "solve2" (fn () =>
                            let val res = solveManifest m_repo20_0_2_0
                                val () = println ("   result = " ^ res)
                            in res = "{github.com/owner1/repo10:0.1.0}"
                            end)
 
-val () = test "solve3" (fn () =>
+val () = testf "solve3" (fn () =>
                            let val res = solveManifest m_repo20_0_2_1
                                val () = println ("   result = " ^ res)
                            in res = "{github.com/owner1/repo10:0.1.1}"
                            end)
 
-val () = test "solve4" (fn () =>
+val () = testf "solve4" (fn () =>
                            let val res = solveManifest m_repo30_0_3_0
                                val () = println ("   result = " ^ res)
                            in res = "{github.com/owner2/repo20:0.2.0,github.com/owner1/repo10:0.1.0}"
                            end)
 
-val () = test "solve5" (fn () =>
+val () = testf "solve5" (fn () =>
                            let val res = solveManifest m_repo30_0_3_1
                                val () = println ("   result = " ^ res)
                            in res = "{github.com/owner2/repo20:0.2.1,github.com/owner1/repo10:0.1.1}"
                            end)
+
+
+val _ = reportAndExit();

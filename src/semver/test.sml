@@ -1,15 +1,5 @@
-
 open SemVer
-
-fun test s b =
-    if b then print ("OK : " ^ s ^ "\n")
-    else print ("ERR: " ^ s ^ "\n")
-
-fun testf s f =
-    (if f() then print ("OK : " ^ s ^ "\n")
-     else print ("ERR: " ^ s ^ "\n"))
-    handle Fail e => print ("EXN: " ^ s ^ " raised Fail \"" ^ e ^ "\"\n")
-         | Overflow => print ("EXN: " ^ s ^ " raised Overflow\n")
+structure T = TestSuite (); open T
 
 fun test_major_minor_patch s (z,a,b) =
     let val () = test ("major0" ^ s) (Option.map major (fromString z) = SOME 0)
@@ -140,3 +130,5 @@ val () = testf "ovf" (fn () =>
                          let val t = fromString "0.0.0-20180801102532+b70028521e4dbcc286834b32ce82c1d2721a6209"
                          in Option.map major t = SOME 0
                          end)
+
+val _ = reportAndExit();

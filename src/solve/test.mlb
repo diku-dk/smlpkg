@@ -2,7 +2,9 @@ local $(SML_LIB)/basis/basis.mlb
       ../semver/semver.mlb
       ../manifest/manifest.mlb
       ../util/util.mlb
+      ../test/testSuite.mlb
       solve.sig
       solve.sml
-in test.sml
+in
+  test.sml
 end

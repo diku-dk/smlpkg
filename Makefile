@@ -25,6 +25,12 @@ clean:
 src/smlpkg:
 	$(MAKE) -C src all
 
+.PHONY: test-all-supported-compilers
+test-all-supported-compilers:
+	$(MAKE) clean ; $(MAKE) test MLCOMP=mlton
+	$(MAKE) clean ; $(MAKE) test MLCOMP=mlkit
+	$(MAKE) clean ; $(MAKE) test MLCOMP=polymlb
+
 # -----------------------------------------------------
 # Target for building binary distribution for smlpkg
 # -----------------------------------------------------
