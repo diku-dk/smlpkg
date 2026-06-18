@@ -4,12 +4,8 @@ MLCOMP ?= mlkit
 MLCOMP_FLAGS ?=
 
 ifeq ($(MLCOMP), polymlb)
-MLCOMP_FLAGS=-ignore-call-main
+MLCOMP_FLAGS=-ann 'ignoreFiles call-main-smlpkg.sml,call-main-futpkg.sml'
 endif
-ifeq ($(MLCOMP), mlkit)
-MLCOMP_FLAGS=--mlb-subdir $(shell mktemp -d)
-endif
-
 
 SMLFILES=$(shell find . -name '*.sml') $(shell find . -name '*.sig') $(shell find . -name '*.mlb')
 
@@ -19,11 +15,9 @@ GITVERSION=$(shell git describe --abbrev --dirty --always --tags)
 all: smlpkg futpkg
 
 smlpkg: smlpkg.mlb $(SMLFILES) version.gen.sml
-	rm -rf MLB
 	$(MLCOMP) $(MLCOMP_FLAGS) -output $@ $<
 
 futpkg: futpkg.mlb $(SMLFILES)
-	rm -rf MLB
 	$(MLCOMP) $(MLCOMP_FLAGS) -output $@ $<
 
 .PHONY: test
