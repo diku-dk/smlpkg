@@ -1,8 +1,5 @@
-
 open SemVer
-
-structure T = TestSuite ()
-open T
+structure T = TestSuite (); open T
 
 fun test_major_minor_patch s (z,a,b) =
     let val () = test ("major0" ^ s) (Option.map major (fromString z) = SOME 0)

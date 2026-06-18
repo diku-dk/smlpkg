@@ -1,7 +1,6 @@
 local $(SML_LIB)/basis/basis.mlb
       manifest.mlb
+      ../test/testSuite.mlb
 in
-   ../test/preamble.sml
    test.sml
-   ../test/postamble.sml
 end
