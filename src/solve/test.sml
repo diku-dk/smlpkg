@@ -1,4 +1,4 @@
-
+structure T = TestSuite (); open T
 val () = println "Testing Solve"
 
 fun no_version p v =
@@ -94,3 +94,4 @@ val () = testf "solve5" (fn () =>
                            end)
 
 
+val _ = reportAndExit();
