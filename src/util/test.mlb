@@ -1,8 +1,6 @@
 local $(SML_LIB)/basis/basis.mlb
+      ../test/testSuite.mlb
       util.mlb
 in
-   ../test/preamble.sml
    test.sml
-   test_system.sml
-   ../test/postamble.sml
 end
