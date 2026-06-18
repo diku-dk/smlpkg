@@ -1,8 +1,13 @@
 MLCOMP ?= mlkit
+MLCOMP_FLAGS ?=
+
+ifeq ($(MLCOMP), polymlb)
+MLCOMP_FLAGS=-main reportAndExit
+endif
 
 .PHONY: test
 test:
-	$(MLCOMP) -output test.exe test.mlb
+	$(MLCOMP) $(MLCOMP_FLAGS) -output test.exe test.mlb
 	./test.exe
 
 .PHONY: clean

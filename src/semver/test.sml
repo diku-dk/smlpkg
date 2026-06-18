@@ -1,6 +1,9 @@
 
 open SemVer
 
+structure T = TestSuite ()
+open T
+
 fun test_major_minor_patch s (z,a,b) =
     let val () = test ("major0" ^ s) (Option.map major (fromString z) = SOME 0)
         val () = test ("major1" ^ s) (Option.map major (fromString a) = SOME 3)
@@ -131,3 +134,4 @@ val () = testf "ovf" (fn () =>
                          in Option.map major t = SOME 0
                          end)
 
+val _ = reportAndExit();
